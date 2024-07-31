@@ -27,7 +27,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
-import { supabase } from '../lib/supabaseClient';
+import supabase  from '../lib/supabaseClient';
 
 const GestaoClientes = () => {
   const [clientes, setClientes] = useState([]);
