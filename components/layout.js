@@ -20,19 +20,30 @@ import {
 } from '@chakra-ui/react'
 import { FiMenu, FiUser, FiBell } from 'react-icons/fi'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPowerOff } from '@fortawesome/free-solid-svg-icons'
+import {
+  faPowerOff,
+  faUsers,
+  faChartLine,
+  faClipboardList,
+  faUserTie,
+  faBoxes,
+  faFileInvoiceDollar,
+  faChartBar,
+  faCog,
+  faLifeRing
+} from '@fortawesome/free-solid-svg-icons'
 import supabase from '../lib/supabaseClient'
 
 const navLinks = [
-  { label: 'Gestão de Clientes', href: '/client-management' },
-  { label: 'Gestão de Vendas', href: '/sales-management' },
-  { label: 'Gestão de Serviços', href: '/service-management' },
-  { label: 'Gestão de Funcionários', href: '/employee-management' },
-  { label: 'Gestão de Estoque', href: '/inventory-management' },
-  { label: 'Faturamento e Pagamentos', href: '/billing-payments' },
-  { label: 'Relatórios e Análises', href: '/reports-analytics' },
-  { label: 'Configurações', href: '/settings-configuration' },
-  { label: 'Suporte e Feedback', href: '/support-feedback' },
+  { label: 'Gestão de Clientes', href: '/client-management', icon: faUsers },
+  { label: 'Gestão de Vendas', href: '/sales-management', icon: faChartLine },
+  { label: 'Gestão de Serviços', href: '/service-management', icon: faClipboardList },
+  { label: 'Gestão de Funcionários', href: '/employee-management', icon: faUserTie },
+  { label: 'Gestão de Estoque', href: '/inventory-management', icon: faBoxes },
+  { label: 'Faturamento e Pagamentos', href: '/billing-payments', icon: faFileInvoiceDollar },
+  { label: 'Relatórios e Análises', href: '/reports-analytics', icon: faChartBar },
+  { label: 'Configurações', href: '/settings-configuration', icon: faCog },
+  { label: 'Suporte e Feedback', href: '/support-feedback', icon: faLifeRing },
 ]
 
 const Layout = ({ children }) => {
@@ -136,33 +147,33 @@ const Layout = ({ children }) => {
       </Flex>
 
       <Flex flex="1">
-        <Drawer isOpen={isOpen} onClose={onClose} placement="left">
-          <DrawerOverlay />
-          <DrawerContent>
-            <DrawerCloseButton />
-            <DrawerHeader>Menu</DrawerHeader>
-            <DrawerBody>
-              <VStack align="stretch" spacing={2}>
-                {navLinks.map((link) => (
-                  <Button
-                    key={link.href}
-                    as="a"
-                    href={link.href}
-                    variant="ghost"
-                    justifyContent="flex-start"
-                    fontWeight="normal"
-                    borderRadius="0"
-                    _hover={{ bg: 'gray.100' }}
-                    _active={{ bg: 'gray.200' }}
-                  >
-                    {link.label}
-                  </Button>
-                ))}
-              </VStack>
-            </DrawerBody>
-          </DrawerContent>
-        </Drawer>
-        
+     <Drawer isOpen={isOpen} onClose={onClose} placement="left">
+              <DrawerOverlay />
+              <DrawerContent>
+                <DrawerCloseButton />
+                <DrawerHeader>Menu</DrawerHeader>
+                <DrawerBody>
+                  <VStack align="stretch" spacing={2}>
+                    {navLinks.map((link) => (
+                      <Button
+                        key={link.href}
+                        as="a"
+                        href={link.href}
+                        variant="ghost"
+                        justifyContent="flex-start"
+                        fontWeight="normal"
+                        borderRadius="0"
+                        _hover={{ bg: 'gray.100' }}
+                        _active={{ bg: 'gray.200' }}
+                        leftIcon={<FontAwesomeIcon icon={link.icon} />}
+                      >
+                        {link.label}
+                      </Button>
+                    ))}
+                  </VStack>
+                </DrawerBody>
+              </DrawerContent>
+            </Drawer>    
         <Box flex="1" p={4}>
           <Container maxW="container.lg" p={4}>
             {children}
