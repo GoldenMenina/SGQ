@@ -3,10 +3,8 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import {
   Box,
-  Button,
   Container,
   Flex,
-  Heading,
   IconButton,
   useDisclosure,
   Drawer,
@@ -16,14 +14,14 @@ import {
   DrawerHeader,
   DrawerBody,
   Stack,
+  Text,
   useToast,
-  Icon,
-  useBreakpointValue,
+  VStack,
+  HStack,
 } from '@chakra-ui/react'
-import { FiMenu } from 'react-icons/fi'
-import { FiUser } from 'react-icons/fi'
-import { FiBell } from 'react-icons/fi'
-import { FiLogOut } from 'react-icons/fi'
+import { FiMenu, FiUser, FiBell } from 'react-icons/fi'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPowerOff } from '@fortawesome/free-solid-svg-icons'
 import supabase from '../lib/supabaseClient'
 
 const navLinks = [
@@ -95,10 +93,7 @@ const Layout = ({ children }) => {
   }
 
   return (
-    <>
-    {session ?(
     <Flex direction="column" minH="100vh">
-
       <Flex
         as="header"
         bg="teal.500"
@@ -130,7 +125,7 @@ const Layout = ({ children }) => {
             mr={4}
           />
           <IconButton
-            icon={<FiLogOut />}
+            icon={<FontAwesomeIcon icon={faPowerOff} />}
             aria-label="Logout"
             onClick={handleLogout}
             variant="outline"
@@ -146,19 +141,15 @@ const Layout = ({ children }) => {
             <DrawerCloseButton />
             <DrawerHeader>Menu</DrawerHeader>
             <DrawerBody>
-              <Stack spacing={4}>
+              <VStack align="stretch" spacing={4}>
                 {navLinks.map((link) => (
-                  <Button
-                    key={link.href}
-                    as="a"
-                    href={link.href}
-                    variant="outline"
-                    width="100%"
-                  >
-                    {link.label}
-                  </Button>
+                  <Box key={link.href} p={2} bg="gray.100" borderRadius="md" _hover={{ bg: 'gray.200' }}>
+                    <Text as="a" href={link.href} display="block" fontWeight="bold">
+                      {link.label}
+                    </Text>
+                  </Box>
                 ))}
-              </Stack>
+              </VStack>
             </DrawerBody>
           </DrawerContent>
         </Drawer>
@@ -169,8 +160,7 @@ const Layout = ({ children }) => {
           </Container>
         </Box>
       </Flex>
-    </Flex>):(children)}
-    </>
+    </Flex>
   )
 }
 
