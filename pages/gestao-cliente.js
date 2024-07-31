@@ -119,6 +119,7 @@ const GestaoClientes = () => {
       const { error } = await supabase.from('clientes').insert(clienteData);
 
       if (error) {
+        console.log(error)
         toast({
           title: 'Erro ao adicionar cliente',
           description: error.message,
