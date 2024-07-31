@@ -35,7 +35,7 @@ import {
 import supabase from '../lib/supabaseClient'
 
 const navLinks = [
-  { label: 'Gestão de Clientes', href: '/client-management', icon: faUsers },
+  { label: 'Gestão de Clientes', href: '/gestao-cliente', icon: faUsers },
   { label: 'Gestão de Vendas', href: '/sales-management', icon: faChartLine },
   { label: 'Gestão de Serviços', href: '/service-management', icon: faClipboardList },
   { label: 'Gestão de Funcionários', href: '/employee-management', icon: faUserTie },
