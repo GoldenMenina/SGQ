@@ -9,11 +9,11 @@ function LoginPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Redirect authenticated users away from the login page
+    // Redirecionar usuários autenticados para fora da página de login
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
-        router.push('/') // Redirect to homepage or another page
+        router.push('/') // Redirecionar para a página inicial ou outra página
       }
     }
 
@@ -36,7 +36,7 @@ function LoginPage() {
         isClosable: true,
       })
     } else {
-      router.push('/') // Redirect to homepage or another page after successful login
+      router.push('/') // Redirecionar para a página inicial ou outra página após login bem-sucedido
     }
   }
 
