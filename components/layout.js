@@ -20,7 +20,10 @@ import {
   Icon,
   useBreakpointValue,
 } from '@chakra-ui/react'
-import { FiMenu, FiUser, FiBell, FiLogOut } from 'react-icons/fi'
+import { FiMenu } from 'react-icons/fi'
+import { FiUser } from 'react-icons/fi'
+import { FiBell } from 'react-icons/fi'
+import { FiLogOut } from 'react-icons/fi'
 import supabase from '../lib/supabaseClient'
 
 const navLinks = [
