@@ -102,52 +102,57 @@ const Layout = ({ children }) => {
     return <Box>Carregando...</Box>
   }
 
-  return (
+return (
     <>
-    { session ? (
-    <Flex direction="column" minH="100vh">
-      <Flex
-        as="header"
-        bg="teal.500"
-        color="white"
-        p={4}
-        align="center"
-        justify="space-between"
-      >
-        <IconButton
-          icon={<FiMenu />}
-          aria-label="Abrir Menu"
-          onClick={onOpen}
-          variant="outline"
-          colorScheme="whiteAlpha"
-        />
-        <Flex align="center">
-          <IconButton
-            icon={<FiBell />}
-            aria-label="Notificações"
-            variant="outline"
-            colorScheme="whiteAlpha"
-            mr={4}
-          />
-          <IconButton
-            icon={<FiUser />}
-            aria-label="Perfil do Usuário"
-            variant="outline"
-            colorScheme="whiteAlpha"
-            mr={4}
-          />
-          <IconButton
-            icon={<FontAwesomeIcon icon={faPowerOff} />}
-            aria-label="Sair"
-            onClick={handleLogout}
-            variant="outline"
-            colorScheme="whiteAlpha"
-          />
-        </Flex>
-      </Flex>
+      {session ? (
+        <Flex direction="column" minH="100vh">
+          <Flex
+            as="header"
+            bg="teal.500"
+            color="white"
+            p={4}
+            align="center"
+            justify="space-between"
+            width="100%"
+            position="fixed"
+            top={0}
+            zIndex={1000}
+          >
+            <IconButton
+              icon={<FiMenu />}
+              aria-label="Abrir Menu"
+              onClick={onOpen}
+              variant="outline"
+              colorScheme="whiteAlpha"
+            />
+            <HStack spacing={2}>
+              <IconButton
+                icon={<FiBell />}
+                aria-label="Notificações"
+                variant="outline"
+                colorScheme="whiteAlpha"
+                size="sm"
+              />
+              <IconButton
+                icon={<FiUser />}
+                aria-label="Perfil do Usuário"
+                variant="outline"
+                colorScheme="whiteAlpha"
+                size="sm"
+              />
+              <IconButton
+                icon={<FontAwesomeIcon icon={faPowerOff} />}
+                aria-label="Sair"
+                onClick={handleLogout}
+                variant="outline"
+                colorScheme="whiteAlpha"
+                size="sm"
+              />
+            </HStack>
+          </Flex>
 
-      <Flex flex="1">
-     <Drawer isOpen={isOpen} onClose={onClose} placement="left">
+          <Flex flex="1" mt="60px">
+            <Drawer isOpen={isOpen} onClose={onClose} placement="left">
               <DrawerOverlay />
               <DrawerContent>
                 <DrawerCloseButton />
@@ -166,6 +171,7 @@ const Layout = ({ children }) => {
                         _hover={{ bg: 'gray.100' }}
                         _active={{ bg: 'gray.200' }}
                         leftIcon={<FontAwesomeIcon icon={link.icon} />}
+                        width="100%"
                       >
                         {link.label}
                       </Button>
@@ -173,14 +179,19 @@ const Layout = ({ children }) => {
                   </VStack>
                 </DrawerBody>
               </DrawerContent>
-            </Drawer>    
-        <Box flex="1" p={4}>
-          <Container maxW="container.lg" p={4}>
-            {children}
-          </Container>
-        </Box>
-      </Flex>
-    </Flex> ) : (children) } </>
+            </Drawer>
+            
+            <Box flex="1" p={4} width="100%">
+              <Container maxW="container.xl" p={4}>
+                {children}
+              </Container>
+            </Box>
+          </Flex>
+        </Flex>
+      ) : (
+        children
+      )}
+    </>
   )
 }
 
