@@ -6,9 +6,12 @@
     "start": "NODE_ENV=development node app.js"
   },
   "dependencies": {
-    
+    "@chakra-ui/react": "^2.8.2",
+    "@emotion/react": "^11.13.0",
+    "@emotion/styled": "^11.13.0",
     "@supabase/supabase-js": "^2.44.3",
     "axios": "^1.6.5",
+    "framer-motion": "^11.3.19",
     "next": "^12.1.5",
     "node-fetch": "^3.3.2",
     "react": "^17.0.2",
