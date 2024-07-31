@@ -96,7 +96,7 @@ const Layout = ({ children }) => {
 
   return (
     <>
-    {session &&(
+    {session ?(
     <Flex direction="column" minH="100vh">
 
       <Flex
@@ -169,7 +169,7 @@ const Layout = ({ children }) => {
           </Container>
         </Box>
       </Flex>
-    </Flex>)}
+    </Flex>):(children)}
     </>
   )
 }
