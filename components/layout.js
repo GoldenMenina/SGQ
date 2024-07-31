@@ -39,7 +39,7 @@ const navLinks = [
   { label: 'Gestão de Clientes', href: '/gestao-cliente', icon: faUsers },
   { label: 'Gestão de Vendas', href: '/gestao-vendas', icon: faChartLine },
   { label: 'Gestão de Serviços', href: '/gestao-servico', icon: faClipboardList },
-  { label: 'Gestão de Funcionários', href: '/employee-management', icon: faUserTie },
+  { label: 'Gestão de Funcionários', href: '/gestao-funcionarios', icon: faUserTie },
   { label: 'Gestão de Estoque', href: '/inventory-management', icon: faBoxes },
   { label: 'Faturamento e Pagamentos', href: '/billing-payments', icon: faFileInvoiceDollar },
   { label: 'Relatórios e Análises', href: '/reports-analytics', icon: faChartBar },
