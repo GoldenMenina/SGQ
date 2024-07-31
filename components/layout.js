@@ -16,6 +16,7 @@ import {
   Button,
   Text,
   useToast,
+  HStack,
   VStack,
 } from '@chakra-ui/react'
 import { FiMenu, FiUser, FiBell } from 'react-icons/fi'
