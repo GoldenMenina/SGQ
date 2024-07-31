@@ -13,11 +13,10 @@ import {
   DrawerCloseButton,
   DrawerHeader,
   DrawerBody,
-  Stack,
+  Button,
   Text,
   useToast,
   VStack,
-  HStack,
 } from '@chakra-ui/react'
 import { FiMenu, FiUser, FiBell } from 'react-icons/fi'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -25,15 +24,15 @@ import { faPowerOff } from '@fortawesome/free-solid-svg-icons'
 import supabase from '../lib/supabaseClient'
 
 const navLinks = [
-  { label: 'Client Management', href: '/client-management' },
-  { label: 'Sales Management', href: '/sales-management' },
-  { label: 'Service Management', href: '/service-management' },
-  { label: 'Employee Management', href: '/employee-management' },
-  { label: 'Inventory Management', href: '/inventory-management' },
-  { label: 'Billing and Payments', href: '/billing-payments' },
-  { label: 'Reports and Analytics', href: '/reports-analytics' },
-  { label: 'Settings and Configuration', href: '/settings-configuration' },
-  { label: 'Support and Feedback', href: '/support-feedback' },
+  { label: 'Gestão de Clientes', href: '/client-management' },
+  { label: 'Gestão de Vendas', href: '/sales-management' },
+  { label: 'Gestão de Serviços', href: '/service-management' },
+  { label: 'Gestão de Funcionários', href: '/employee-management' },
+  { label: 'Gestão de Estoque', href: '/inventory-management' },
+  { label: 'Faturamento e Pagamentos', href: '/billing-payments' },
+  { label: 'Relatórios e Análises', href: '/reports-analytics' },
+  { label: 'Configurações', href: '/settings-configuration' },
+  { label: 'Suporte e Feedback', href: '/support-feedback' },
 ]
 
 const Layout = ({ children }) => {
@@ -89,7 +88,7 @@ const Layout = ({ children }) => {
   }
 
   if (loading) {
-    return <Box>Loading...</Box>
+    return <Box>Carregando...</Box>
   }
 
   return (
@@ -106,7 +105,7 @@ const Layout = ({ children }) => {
       >
         <IconButton
           icon={<FiMenu />}
-          aria-label="Open Menu"
+          aria-label="Abrir Menu"
           onClick={onOpen}
           variant="outline"
           colorScheme="whiteAlpha"
@@ -114,21 +113,21 @@ const Layout = ({ children }) => {
         <Flex align="center">
           <IconButton
             icon={<FiBell />}
-            aria-label="Notifications"
+            aria-label="Notificações"
             variant="outline"
             colorScheme="whiteAlpha"
             mr={4}
           />
           <IconButton
             icon={<FiUser />}
-            aria-label="User Profile"
+            aria-label="Perfil do Usuário"
             variant="outline"
             colorScheme="whiteAlpha"
             mr={4}
           />
           <IconButton
             icon={<FontAwesomeIcon icon={faPowerOff} />}
-            aria-label="Logout"
+            aria-label="Sair"
             onClick={handleLogout}
             variant="outline"
             colorScheme="whiteAlpha"
@@ -143,13 +142,21 @@ const Layout = ({ children }) => {
             <DrawerCloseButton />
             <DrawerHeader>Menu</DrawerHeader>
             <DrawerBody>
-              <VStack align="stretch" spacing={4}>
+              <VStack align="stretch" spacing={2}>
                 {navLinks.map((link) => (
-                  <Box key={link.href} p={2} bg="gray.100" borderRadius="md" _hover={{ bg: 'gray.200' }}>
-                    <Text as="a" href={link.href} display="block" fontWeight="bold">
-                      {link.label}
-                    </Text>
-                  </Box>
+                  <Button
+                    key={link.href}
+                    as="a"
+                    href={link.href}
+                    variant="ghost"
+                    justifyContent="flex-start"
+                    fontWeight="normal"
+                    borderRadius="0"
+                    _hover={{ bg: 'gray.100' }}
+                    _active={{ bg: 'gray.200' }}
+                  >
+                    {link.label}
+                  </Button>
                 ))}
               </VStack>
             </DrawerBody>
