@@ -20,6 +20,8 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Select,
+  Textarea,
   useDisclosure,
   IconButton,
   useToast,
@@ -35,23 +37,32 @@ const GestaoClientes = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
-  const itemsPerPage = 10; // Número de clientes por página
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchClientes();
   }, [currentPage]);
 
   const fetchClientes = async () => {
-    const { data, error, count } = await supabase
-      .from('clientes')
-      .select('*', { count: 'exact' })
-      .range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
+    try {
+      const { data, error, count } = await supabase
+        .from('clientes')
+        .select('*', { count: 'exact' })
+        .range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
 
-    if (error) {
-      console.error('Erro ao buscar clientes:', error);
-    } else {
+      if (error) throw error;
+
       setClientes(data);
       setTotalPages(Math.ceil(count / itemsPerPage));
+    } catch (error) {
+      console.error('Erro ao buscar clientes:', error);
+      toast({
+        title: 'Erro ao buscar clientes',
+        description: error.message,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 
@@ -66,16 +77,10 @@ const GestaoClientes = () => {
   };
 
   const handleDeleteCliente = async (id) => {
-    const { error } = await supabase.from('clientes').delete().eq('id', id);
-    if (error) {
-      toast({
-        title: 'Erro ao excluir cliente',
-        description: error.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    } else {
+    try {
+      const { error } = await supabase.from('clientes').delete().eq('id', id);
+      if (error) throw error;
+
       toast({
         title: 'Cliente excluído com sucesso',
         status: 'success',
@@ -83,6 +88,14 @@ const GestaoClientes = () => {
         isClosable: true,
       });
       fetchClientes();
+    } catch (error) {
+      toast({
+        title: 'Erro ao excluir cliente',
+        description: error.message,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 
@@ -91,43 +104,24 @@ const GestaoClientes = () => {
     const formData = new FormData(event.target);
     const clienteData = Object.fromEntries(formData.entries());
 
-    if (selectedCliente) {
-      // Editar cliente existente
-      const { error } = await supabase
-        .from('clientes')
-        .update(clienteData)
-        .eq('id', selectedCliente.id);
+    try {
+      if (selectedCliente) {
+        const { error } = await supabase
+          .from('clientes')
+          .update(clienteData)
+          .eq('id', selectedCliente.id);
+        if (error) throw error;
 
-      if (error) {
-        toast({
-          title: 'Erro ao atualizar cliente',
-          description: error.message,
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-      } else {
         toast({
           title: 'Cliente atualizado com sucesso',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
-      }
-    } else {
-      // Adicionar novo cliente
-      const { error } = await supabase.from('clientes').insert(clienteData);
-
-      if (error) {
-        console.log(error)
-        toast({
-          title: 'Erro ao adicionar cliente',
-          description: error.message,
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
       } else {
+        const { error } = await supabase.from('clientes').insert(clienteData);
+        if (error) throw error;
+
         toast({
           title: 'Cliente adicionado com sucesso',
           status: 'success',
@@ -135,15 +129,24 @@ const GestaoClientes = () => {
           isClosable: true,
         });
       }
-    }
 
-    onClose();
-    fetchClientes();
+      onClose();
+      fetchClientes();
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: `Erro ao ${selectedCliente ? 'atualizar' : 'adicionar'} cliente`,
+        description: error.message,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
   return (
     <Container maxW="container.xl">
-      <Box d="flex" alignItems="center" justifyContent="space-between" mb={5}>
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={5}>
         <Heading as="h1" size="xl">
           Gestão de Clientes
         </Heading>
@@ -187,7 +190,7 @@ const GestaoClientes = () => {
         </Tbody>
       </Table>
 
-      <Box mt={4} d="flex" justifyContent="space-between">
+      <Box mt={4} display="flex" justifyContent="space-between">
         <Button
           onClick={() => setCurrentPage(currentPage - 1)}
           isDisabled={currentPage === 1}
@@ -211,11 +214,11 @@ const GestaoClientes = () => {
             <ModalBody>
               <FormControl>
                 <FormLabel>Nome</FormLabel>
-                <Input name="nome" defaultValue={selectedCliente?.nome} />
+                <Input name="nome" defaultValue={selectedCliente?.nome} required />
               </FormControl>
               <FormControl mt={4}>
                 <FormLabel>NIF</FormLabel>
-                <Input name="nif" defaultValue={selectedCliente?.nif} />
+                <Input name="nif" defaultValue={selectedCliente?.nif} required />
               </FormControl>
               <FormControl mt={4}>
                 <FormLabel>Email</FormLabel>
@@ -225,7 +228,41 @@ const GestaoClientes = () => {
                 <FormLabel>Telefone</FormLabel>
                 <Input name="telefone" defaultValue={selectedCliente?.telefone} />
               </FormControl>
-              {/* Adicione mais campos conforme necessário */}
+              <FormControl mt={4}>
+                <FormLabel>Endereço</FormLabel>
+                <Input name="endereco" defaultValue={selectedCliente?.endereco} />
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Cidade</FormLabel>
+                <Input name="cidade" defaultValue={selectedCliente?.cidade} />
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Código Postal</FormLabel>
+                <Input name="codigo_postal" defaultValue={selectedCliente?.codigo_postal} />
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>País</FormLabel>
+                <Input name="pais" defaultValue={selectedCliente?.pais} />
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Tipo de Cliente</FormLabel>
+                <Select name="tipo_cliente" defaultValue={selectedCliente?.tipo_cliente}>
+                  <option value="individual">Individual</option>
+                  <option value="empresa">Empresa</option>
+                </Select>
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Condições de Pagamento</FormLabel>
+                <Input name="condicoes_pagamento" defaultValue={selectedCliente?.condicoes_pagamento} />
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Limite de Crédito</FormLabel>
+                <Input name="limite_credito" type="number" step="0.01" defaultValue={selectedCliente?.limite_credito} />
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Notas</FormLabel>
+                <Textarea name="notas" defaultValue={selectedCliente?.notas} />
+              </FormControl>
             </ModalBody>
             <ModalFooter>
               <Button colorScheme="blue" mr={3} type="submit">
