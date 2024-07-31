@@ -49,9 +49,10 @@ const Layout = ({ children }) => {
 
   return (
     <Box>
-      <Container maxW="container.lg" py={4}>
-        {children}
-      </Container>
+    {session &&(<Container maxW="container.lg" py={4}>
+            {children}
+          </Container>)}
+      
     </Box>
   )
 }
