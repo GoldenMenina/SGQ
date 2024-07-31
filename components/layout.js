@@ -41,7 +41,7 @@ const navLinks = [
   { label: 'Gestão de Serviços', href: '/gestao-servico', icon: faClipboardList },
   { label: 'Gestão de Funcionários', href: '/gestao-funcionarios', icon: faUserTie },
   { label: 'Gestão de Estoque', href: '/gestao-estoque', icon: faBoxes },
-  { label: 'Faturamento e Pagamentos', href: '/billing-payments', icon: faFileInvoiceDollar },
+  { label: 'Faturamento e Pagamentos', href: '/facturacaopagamento', icon: faFileInvoiceDollar },
   { label: 'Relatórios e Análises', href: '/reports-analytics', icon: faChartBar },
   { label: 'Configurações', href: '/settings-configuration', icon: faCog },
   
