@@ -28,37 +28,36 @@ import {
 } from '@chakra-ui/react';
 import { FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
 import supabase from '../lib/supabaseClient';
-import Invoice from 'react-invoice';
+import InvoiceGenerator from 'react-invoice-generator';
 
-const FacturacaoPagamentos = () => {
-  const [invoices, setInvoices] = useState([]);
+const GestaoFacturacao = () => {
+  const [facturas, setFacturas] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [produtos, setProdutos] = useState([]);
   const [servicos, setServicos] = useState([]);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [selectedFactura, setSelectedFactura] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
   useEffect(() => {
-    fetchInvoices();
+    fetchFacturas();
     fetchClientes();
     fetchProdutos();
     fetchServicos();
   }, []);
 
-  const fetchInvoices = async () => {
+  const fetchFacturas = async () => {
     try {
       const { data, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .order('criado_em', { ascending: false });
+        .from('facturas')
+        .select('*');
 
       if (error) throw error;
-      setInvoices(data);
+      setFacturas(data);
     } catch (error) {
-      console.error('Erro ao buscar invoices:', error);
+      console.error('Erro ao buscar facturas:', error);
       toast({
-        title: 'Erro ao buscar invoices',
+        title: 'Erro ao buscar facturas',
         description: error.message,
         status: 'error',
         duration: 3000,
@@ -71,8 +70,7 @@ const FacturacaoPagamentos = () => {
     try {
       const { data, error } = await supabase
         .from('clientes')
-        .select('*')
-        .order('nome');
+        .select('*');
 
       if (error) throw error;
       setClientes(data);
@@ -92,8 +90,7 @@ const FacturacaoPagamentos = () => {
     try {
       const { data, error } = await supabase
         .from('produtos')
-        .select('*')
-        .order('nome');
+        .select('*');
 
       if (error) throw error;
       setProdutos(data);
@@ -112,9 +109,8 @@ const FacturacaoPagamentos = () => {
   const fetchServicos = async () => {
     try {
       const { data, error } = await supabase
-        .from('servicos')
-        .select('*')
-        .order('titulo');
+        .from('serviços')
+        .select('*');
 
       if (error) throw error;
       setServicos(data);
@@ -130,31 +126,31 @@ const FacturacaoPagamentos = () => {
     }
   };
 
-  const handleNewInvoice = () => {
-    setSelectedInvoice(null);
+  const handleNovaFactura = () => {
+    setSelectedFactura(null);
     onOpen();
   };
 
-  const handleEditInvoice = (invoice) => {
-    setSelectedInvoice(invoice);
+  const handleEditFactura = (factura) => {
+    setSelectedFactura(factura);
     onOpen();
   };
 
-  const handleDeleteInvoice = async (id) => {
+  const handleDeleteFactura = async (id) => {
     try {
-      const { error } = await supabase.from('invoices').delete().eq('id', id);
+      const { error } = await supabase.from('facturas').delete().eq('id', id);
       if (error) throw error;
 
       toast({
-        title: 'Invoice excluído com sucesso',
+        title: 'Factura excluída com sucesso',
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
-      fetchInvoices();
+      fetchFacturas();
     } catch (error) {
       toast({
-        title: 'Erro ao excluir invoice',
+        title: 'Erro ao excluir factura',
         description: error.message,
         status: 'error',
         duration: 3000,
@@ -166,28 +162,28 @@ const FacturacaoPagamentos = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const invoiceData = Object.fromEntries(formData.entries());
+    const facturaData = Object.fromEntries(formData.entries());
 
     try {
-      if (selectedInvoice) {
+      if (selectedFactura) {
         const { error } = await supabase
-          .from('invoices')
-          .update(invoiceData)
-          .eq('id', selectedInvoice.id);
+          .from('facturas')
+          .update(facturaData)
+          .eq('id', selectedFactura.id);
         if (error) throw error;
 
         toast({
-          title: 'Invoice atualizado com sucesso',
+          title: 'Factura atualizada com sucesso',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
       } else {
-        const { error } = await supabase.from('invoices').insert(invoiceData);
+        const { error } = await supabase.from('facturas').insert(facturaData);
         if (error) throw error;
 
         toast({
-          title: 'Invoice adicionado com sucesso',
+          title: 'Factura adicionada com sucesso',
           status: 'success',
           duration: 3000,
           isClosable: true,
@@ -195,11 +191,11 @@ const FacturacaoPagamentos = () => {
       }
 
       onClose();
-      fetchInvoices();
+      fetchFacturas();
     } catch (error) {
       console.error(error);
       toast({
-        title: `Erro ao ${selectedInvoice ? 'atualizar' : 'adicionar'} invoice`,
+        title: `Erro ao ${selectedFactura ? 'atualizar' : 'adicionar'} factura`,
         description: error.message,
         status: 'error',
         duration: 3000,
@@ -214,8 +210,8 @@ const FacturacaoPagamentos = () => {
         <Heading as="h1" size="xl">
           Facturação e Pagamentos
         </Heading>
-        <Button leftIcon={<FiPlus />} colorScheme="teal" onClick={handleNewInvoice}>
-          Novo Invoice
+        <Button leftIcon={<FiPlus />} colorScheme="teal" onClick={handleNovaFactura}>
+          Nova Factura
         </Button>
       </Box>
 
@@ -224,29 +220,29 @@ const FacturacaoPagamentos = () => {
           <Tr>
             <Th>Cliente</Th>
             <Th>Tipo</Th>
-            <Th>Status</Th>
-            <Th>Criado em</Th>
+            <Th>Estado</Th>
+            <Th>Criado Em</Th>
             <Th>Ações</Th>
           </Tr>
         </Thead>
         <Tbody>
-          {invoices.map((invoice) => (
-            <Tr key={invoice.id}>
-              <Td>{invoice.cliente_id}</Td>
-              <Td>{invoice.tipo}</Td>
-              <Td>{invoice.status}</Td>
-              <Td>{new Date(invoice.criado_em).toLocaleDateString()}</Td>
+          {facturas.map((factura) => (
+            <Tr key={factura.id}>
+              <Td>{clientes.find(cliente => cliente.id === factura.cliente_id)?.nome}</Td>
+              <Td>{factura.tipo}</Td>
+              <Td>{factura.estado}</Td>
+              <Td>{new Date(factura.criado_em).toLocaleDateString()}</Td>
               <Td>
                 <IconButton
                   icon={<FiEdit />}
                   aria-label="Editar"
                   mr={2}
-                  onClick={() => handleEditInvoice(invoice)}
+                  onClick={() => handleEditFactura(factura)}
                 />
                 <IconButton
                   icon={<FiTrash2 />}
                   aria-label="Excluir"
-                  onClick={() => handleDeleteInvoice(invoice.id)}
+                  onClick={() => handleDeleteFactura(factura.id)}
                 />
               </Td>
             </Tr>
@@ -257,13 +253,14 @@ const FacturacaoPagamentos = () => {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>{selectedInvoice ? 'Editar Invoice' : 'Novo Invoice'}</ModalHeader>
+          <ModalHeader>{selectedFactura ? 'Editar Factura' : 'Nova Factura'}</ModalHeader>
           <ModalCloseButton />
           <form onSubmit={handleSubmit}>
             <ModalBody>
               <FormControl>
-                <FormLabel>Cliente</FormLabel><Select name="cliente_id" defaultValue={selectedInvoice?.cliente_id} required>
-                  {clientes.map((cliente) => (
+                <FormLabel>Cliente</FormLabel>
+                <Select name="cliente_id" defaultValue={selectedFactura?.cliente_id} required>
+                  {clientes.map(cliente => (
                     <option key={cliente.id} value={cliente.id}>
                       {cliente.nome}
                     </option>
@@ -271,63 +268,26 @@ const FacturacaoPagamentos = () => {
                 </Select>
               </FormControl>
               <FormControl mt={4}>
-                <FormLabel>Funcionário</FormLabel>
-                <Select name="funcionario_id" defaultValue={selectedInvoice?.funcionario_id} required>
-                  {/* Assuming you have a list of funcionarios in your state */}
-                  {usuarios.map((usuario) => (
-                    <option key={usuario.id} value={usuario.id}>
-                      {usuario.nome}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl mt={4}>
                 <FormLabel>Tipo</FormLabel>
-                <Select name="tipo" defaultValue={selectedInvoice?.tipo || 'proforma'} required>
+                <Select name="tipo" defaultValue={selectedFactura?.tipo} required>
                   <option value="proforma">Proforma</option>
                   <option value="invoice">Invoice</option>
                 </Select>
               </FormControl>
               <FormControl mt={4}>
-                <FormLabel>Status</FormLabel>
-                <Select name="status" defaultValue={selectedInvoice?.status || 'open'} required>
-                  <option value="open">Open</option>
-                  <option value="paid">Paid</option>
-                  <option value="cancelled">Cancelled</option>
-                </Select>
+                <FormLabel>Produtos/Serviços</FormLabel>
+                {/* Add a component for managing items */}
+                <InvoiceGenerator
+                  produtos={produtos}
+                  servicos={servicos}
+                  selectedItems={selectedFactura?.items || []}
+                />
               </FormControl>
               <FormControl mt={4}>
-                <FormLabel>Itens</FormLabel>
-                {/* Render input fields for adding produtos/servicos to the invoice */}
-                {/* You can use a dynamic form component or a library like Formik for this */}
-                {selectedInvoice?.items.map((item, index) => (
-                  <Box key={index}>
-                    <Select name={`items[${index}].item_type`} defaultValue={item.item_type} required>
-                      <option value="produto">Produto</option>
-                      <option value="serviço">Serviço</option>
-                    </Select>
-                    <Select name={`items[${index}].item_id`} defaultValue={item.item_id} required>
-                      {item.item_type === 'produto'
-                        ? produtos.map((produto) => (
-                            <option key={produto.id} value={produto.id}>
-                              {produto.nome}
-                            </option>
-                          ))
-                        : servicos.map((servico) => (
-                            <option key={servico.id} value={servico.id}>
-                              {servico.titulo}
-                            </option>
-                          ))}
-                    </Select>
-                    <NumberInput min={0} defaultValue={item.quantidade}>
-                      <NumberInputField name={`items[${index}].quantidade`} required />
-                    </NumberInput>
-                    <NumberInput min={0} precision={2} defaultValue={item.preco_unitario}>
-                      <NumberInputField name={`items[${index}].preco_unitario`} required />
-                    </NumberInput>
-                    <Input type="hidden" name={`items[${index}].total`} value={item.total} />
-                  </Box>
-                ))}
+                <FormLabel>Funcionário</FormLabel>
+                <Select name="funcionario_id" defaultValue={selectedFactura?.funcionario_id} required>
+                  {/* Populate this with the list of users */}
+                </Select>
               </FormControl>
             </ModalBody>
             <ModalFooter>
@@ -343,4 +303,4 @@ const FacturacaoPagamentos = () => {
   );
 };
 
-export default FacturacaoPagamentos;
+export default GestaoFacturacao;
