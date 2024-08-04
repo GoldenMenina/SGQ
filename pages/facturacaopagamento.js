@@ -97,7 +97,7 @@ const Facturacao = () => {
 
   const fetchServicos = async () => {
     try {
-      const { data, error } = await supabase.from('servicos').select('*').order('titulo');
+      const { data, error } = await supabase.from('serviços').select('*').order('titulo');
       if (error) throw error;
       setServicos(data);
     } catch (error) {
