@@ -111,6 +111,25 @@ const Facturacao = () => {
       });
     }
   };
+  const fetchFacturaItens = async (facturaId) => {
+  try {
+    const { data, error } = await supabase
+      .from('factura_itens')
+      .select('*')
+      .eq('factura_id', facturaId);
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Erro ao buscar itens da factura:', error);
+    toast({
+      title: 'Erro ao buscar itens da factura',
+      description: error.message,
+      status: 'error',
+      duration: 3000,
+      isClosable: true,
+    });
+  }
+};
 
   const handleNovoFactura = () => {
     setSelectedFactura(null);
@@ -146,56 +165,75 @@ const Facturacao = () => {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const facturaData = Object.fromEntries(formData.entries());
+  event.preventDefault();
+  const formData = new FormData(event.target);
+  const facturaData = Object.fromEntries(formData.entries());
 
-    try {
-      if (selectedFactura) {
-        const { error } = await supabase
-          .from('facturas')
-          .update(facturaData)
-          .eq('id', selectedFactura.id);
-        if (error) throw error;
-
-        toast({
-          title: 'Factura atualizada com sucesso',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-      } else {
-        const { error } = await supabase.from('facturas').insert(facturaData);
-        if (error) throw error;
-
-        toast({
-          title: 'Factura adicionada com sucesso',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-
-      onClose();
-      fetchFacturas();
-    } catch (error) {
-      console.error(error);
-      toast({
-        title: `Erro ao ${selectedFactura ? 'atualizar' : 'adicionar'} factura`,
-        description: error.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
+  try {
+    let facturaId;
+    if (selectedFactura) {
+      const { data, error } = await supabase
+        .from('facturas')
+        .update(facturaData)
+        .eq('id', selectedFactura.id);
+      if (error) throw error;
+      facturaId = data[0].id;
+    } else {
+      const { data, error } = await supabase.from('facturas').insert(facturaData);
+      if (error) throw error;
+      facturaId = data[0].id;
     }
-  };
 
-  const generatePDF = (factura) => {
+    // Handle items
+    // Assuming items are sent in form data as 'item_<index>_produto_id', 'item_<index>_quantidade', etc.
+    const items = [];
+    formData.forEach((value, key) => {
+      const match = key.match(/^item_(\d+)_(.+)$/);
+      if (match) {
+        const [, index, field] = match;
+        items[index] = items[index] || {};
+        items[index][field] = value;
+      }
+    });
+
+    await Promise.all(
+      items.map(async (item) => {
+        const { id, ...itemData } = item;
+        if (id) {
+          await supabase.from('factura_itens').update(itemData).eq('id', id);
+        } else {
+          await supabase.from('factura_itens').insert({ ...itemData, factura_id: facturaId });
+        }
+      })
+    );
+
+    toast({
+      title: `Factura ${selectedFactura ? 'atualizada' : 'adicionada'} com sucesso`,
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    });
+
+    onClose();
+    fetchFacturas();
+  } catch (error) {
+    console.error(error);
+    toast({
+      title: `Erro ao ${selectedFactura ? 'atualizar' : 'adicionar'} factura`,
+      description: error.message,
+      status: 'error',
+      duration: 3000,
+      isClosable: true,
+    });
+  }
+};
+  const generatePDF = async (factura) => {
     const doc = new jsPDF();
-
+    const itens = await fetchFacturaItens(factura.id);
+  
     // Add title
     doc.text("Proforma Invoice", 20, 20);
-
+  
     // Add client info
     const cliente = clientes.find((c) => c.id === factura.cliente_id);
     if (cliente) {
@@ -203,9 +241,8 @@ const Facturacao = () => {
       doc.text(`Client Email: ${cliente.email}`, 20, 40);
       doc.text(`Client Phone: ${cliente.telefone}`, 20, 50);
     }
-
+  
     // Add invoice items
-    const itens = factura.itens || [];
     let yOffset = 60;
     itens.forEach((item, index) => {
       const produto = produtos.find((p) => p.id === item.produto_id);
@@ -215,10 +252,10 @@ const Facturacao = () => {
       doc.text(`Preço: ${item.preco}`, 20, yOffset + 20);
       yOffset += 30;
     });
-
+  
     // Add total
     doc.text(`Total: ${factura.total}`, 20, yOffset);
-
+  
     // Save the PDF
     doc.save(`proforma_invoice_${factura.id}.pdf`);
   };
@@ -303,7 +340,37 @@ const Facturacao = () => {
                 <FormLabel>Total</FormLabel>
                 <Input name="total" type="number" step="0.01" defaultValue={selectedFactura?.total} required />
               </FormControl>
-              {/* Add more form controls as needed for the items */}
+               <Heading as="h3" size="md" mt={6} mb={4}>
+    Itens
+  </Heading>
+  {Array.from({ length: 5 }).map((_, index) => (
+    <Box key={index} mb={4}>
+      <FormControl>
+        <FormLabel>Produto/Serviço</FormLabel>
+        <Select name={`item_${index}_produto_id`}>
+          <option value="">Selecione</option>
+          {produtos.map((produto) => (
+            <option key={produto.id} value={produto.id}>
+              {produto.nome}
+            </option>
+          ))}
+          {servicos.map((servico) => (
+            <option key={servico.id} value={servico.id}>
+              {servico.titulo}
+            </option>
+          ))}
+        </Select>
+      </FormControl>
+      <FormControl mt={2}>
+        <FormLabel>Quantidade</FormLabel>
+        <Input name={`item_${index}_quantidade`} type="number" step="1" min="1" />
+      </FormControl>
+      <FormControl mt={2}>
+        <FormLabel>Preço</FormLabel>
+        <Input name={`item_${index}_preco`} type="number" step="0.01" min="0" />
+      </FormControl>
+    </Box>
+  ))}
             </ModalBody>
             <ModalFooter>
               <Button colorScheme="blue" mr={3} type="submit">
