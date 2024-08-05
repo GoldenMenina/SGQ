@@ -342,9 +342,9 @@ const Facturacao = () => {
               </FormControl><FormControl id="status" mb={4} isRequired>
                 <FormLabel>Status</FormLabel>
                 <Select name="status" defaultValue={selectedFactura?.status || ''}>
-                  <option value="Proforma">Proforma</option>
-                  <option value="Invoice">Invoice</option>
-                  <option value="Paid">Paid</option>
+                  <option value="proforma">Proforma</option>
+                  <option value="invoice">Invoice</option>
+                  <option value="paid">Pago</option>
                 </Select>
               </FormControl>
               <FormControl mb={4}>
