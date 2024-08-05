@@ -239,8 +239,8 @@ const Facturacao = () => {
         status: 'error',
         duration: 3000,
         isClosable: true,
-      });*/
-    }
+      });
+    } */
   };
   const fetchCompanyDetails = async () => {
   try {
