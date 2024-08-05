@@ -196,88 +196,124 @@ const Facturacao = () => {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const facturaData = Object.fromEntries(formData.entries());
-    facturaData.total = calculateTotal();
+  event.preventDefault();
+  const formData = new FormData(event.target);
+  const facturaData = Object.fromEntries(formData.entries());
+
+  // Ensure total is non-negative and calculate total if necessary
+  if (isNaN(facturaData.total) || parseFloat(facturaData.total) < 0) {
+    return toast({
+      title: 'Total inválido',
+      description: 'O total deve ser um valor não negativo.',
+      status: 'error',
+      duration: 3000,
+      isClosable: true,
+    });
+  }
+
+  // Assuming calculateTotal is a function that returns the total value
+  facturaData.total = calculateTotal();
   
-    try {
-      let facturaId;
-      if (selectedFactura) {
-        // Update existing factura
-        const { data, error } = await supabase
-          .from('facturas')
-          .update(facturaData)
-          .eq('id', selectedFactura.id)
-          .select();
-        if (error) throw error;
-        if (!data || data.length === 0) {
-          throw new Error('Factura was updated but no data was returned');
-        }
-        facturaId = selectedFactura.id;
-      } else {
-        // Insert new factura
-        const { data, error } = await supabase
-          .from('facturas')
-          .insert(facturaData)
-          .select();
-        if (error) throw error;
-        if (!data || data.length === 0) {
-          throw new Error('Factura was inserted but no data was returned');
-        }
-        facturaId = data[0].id;
-      }
-  
-      console.log('Factura ID:', facturaId);
-      console.log('Items to insert/update:', itens);
-  
-      // Handle factura_itens
-      for (const item of itens) {
-        const itemData = { ...item, factura_id: facturaId };
-        if (item.id) {
-          // Update existing item
-          const { error } = await supabase
-            .from('factura_itens')
-            .update(itemData)
-            .eq('id', item.id);
-          if (error) throw error;
-        } else {
-          // Insert new item
-          const { error } = await supabase
-            .from('factura_itens')
-            .insert(itemData);
-          if (error) throw error;
-        }
-      }
-  
-      toast({
-        title: `Factura ${selectedFactura ? 'atualizada' : 'adicionada'} com sucesso`,
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-  
-      onClose();
-      fetchFacturas();
-    } catch (error) {
-      console.error('Error in handleSubmit:', error);
-      toast({
-        title: `Erro ao ${selectedFactura ? 'atualizar' : 'adicionar'} factura`,
-        description: error.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-  const fetchCompanyDetails = async () => {
+  // Optional: Check for valid status
+  const validStatuses = ['proforma', 'invoice', 'paid'];
+  if (!validStatuses.includes(facturaData.status)) {
+    return toast({
+      title: 'Status inválido',
+      description: `O status deve ser um dos seguintes: ${validStatuses.join(', ')}`,
+      status: 'error',
+      duration: 3000,
+      isClosable: true,
+    });
+  }
+
   try {
-    const { data, error } = await supabase.from('empresa').select('*').single();
-    if (error) throw error;
-    setEmpresa(data)
+    let facturaId;
+    if (selectedFactura) {
+      // Update existing factura
+      const { data, error } = await supabase
+        .from('facturas')
+        .update(facturaData)
+        .eq('id', selectedFactura.id)
+        .select();
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error('Factura was updated but no data was returned');
+      }
+      facturaId = selectedFactura.id;
+    } else {
+      // Insert new factura
+      const { data, error } = await supabase
+        .from('facturas')
+        .insert(facturaData)
+        .select();
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error('Factura was inserted but no data was returned');
+      }
+      facturaId = data[0].id;
+    }
+
+    console.log('Factura ID:', facturaId);
+    console.log('Items to insert/update:', itens);
+
+    // Handle factura_itens
+    for (const item of itens) {
+      const itemData = { ...item, factura_id: facturaId };
+      
+      // Ensure quantity and price are valid
+      if (itemData.quantidade <= 0) {
+        return toast({
+          title: 'Quantidade inválida',
+          description: 'A quantidade deve ser maior que zero.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+      if (itemData.preco < 0) {
+        return toast({
+          title: 'Preço inválido',
+          description: 'O preço deve ser um valor não negativo.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+      
+      if (item.id) {
+        // Update existing item
+        const { error } = await supabase
+          .from('factura_itens')
+          .update(itemData)
+          .eq('id', item.id);
+        if (error) throw error;
+      } else {
+        // Insert new item
+        const { error } = await supabase
+          .from('factura_itens')
+          .insert(itemData);
+        if (error) throw error;
+      }
+    }
+
+    toast({
+      title: `Factura ${selectedFactura ? 'atualizada' : 'adicionada'} com sucesso`,
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    });
+
+    onClose();
+    fetchFacturas();
   } catch (error) {
-    console.error('Erro ao buscar informações da empresa:', error);
-    return null;
+    console.error('Error in handleSubmit:', error);
+    toast({
+      title: `Erro ao ${selectedFactura ? 'atualizar' : 'adicionar'} factura`,
+      description: error.message,
+      status: 'error',
+      duration: 3000,
+      isClosable: true,
+    });
   }
 };
 
