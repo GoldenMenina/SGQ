@@ -200,42 +200,67 @@ const Facturacao = () => {
     const formData = new FormData(event.target);
     const facturaData = Object.fromEntries(formData.entries());
     facturaData.total = calculateTotal();
-
-   /* try { */
+  
+    try {
       let facturaId;
       if (selectedFactura) {
-        const { data, error } = await supabase.from('facturas').update(facturaData).eq('id', selectedFactura.id);
+        // Update existing factura
+        const { data, error } = await supabase
+          .from('facturas')
+          .update(facturaData)
+          .eq('id', selectedFactura.id)
+          .select();
         if (error) throw error;
-        facturaId = data[0].id;
+        if (!data || data.length === 0) {
+          throw new Error('Factura was updated but no data was returned');
+        }
+        facturaId = selectedFactura.id;
       } else {
-      const { data, error } = await supabase.from('facturas').insert(facturaData).select();
-      if (error) throw error;
-      if (!data || data.length === 0) {
-        throw new Error('Factura was inserted but no data was returned');
+        // Insert new factura
+        const { data, error } = await supabase
+          .from('facturas')
+          .insert(facturaData)
+          .select();
+        if (error) throw error;
+        if (!data || data.length === 0) {
+          throw new Error('Factura was inserted but no data was returned');
+        }
+        facturaId = data[0].id;
       }
-      facturaId = data[0].id;
-      }
-
-      await Promise.all(itens.map(async (item) => { console.log(item)
+  
+      console.log('Factura ID:', facturaId);
+      console.log('Items to insert/update:', itens);
+  
+      // Handle factura_itens
+      for (const item of itens) {
         const itemData = { ...item, factura_id: facturaId };
         if (item.id) {
-          await supabase.from('factura_itens').update(itemData).eq('id', item.id);
+          // Update existing item
+          const { error } = await supabase
+            .from('factura_itens')
+            .update(itemData)
+            .eq('id', item.id);
+          if (error) throw error;
         } else {
-          await supabase.from('factura_itens').insert(itemData);
+          // Insert new item
+          const { error } = await supabase
+            .from('factura_itens')
+            .insert(itemData);
+          if (error) throw error;
         }
-      }));
-
+      }
+  
       toast({
         title: `Factura ${selectedFactura ? 'atualizada' : 'adicionada'} com sucesso`,
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
-
+  
       onClose();
       fetchFacturas();
-  /*  } catch (error) {
-      console.error(error);
+    } catch (error) {
+      console.error('Error in handleSubmit:', error);
       toast({
         title: `Erro ao ${selectedFactura ? 'atualizar' : 'adicionar'} factura`,
         description: error.message,
@@ -243,7 +268,7 @@ const Facturacao = () => {
         duration: 3000,
         isClosable: true,
       });
-    } */
+    }
   };
   const fetchCompanyDetails = async () => {
   try {
