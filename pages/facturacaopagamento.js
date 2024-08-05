@@ -23,7 +23,7 @@ import {
   Select,
   useDisclosure,
   useToast,
-  IconButton,
+  IconButton
 } from '@chakra-ui/react';
 import { FiPlus, FiEdit, FiTrash2, FiPrinter } from 'react-icons/fi';
 import jsPDF from 'jspdf';
@@ -35,7 +35,7 @@ const Facturacao = () => {
   const [produtos, setProdutos] = useState([]);
   const [servicos, setServicos] = useState([]);
   const [selectedFactura, setSelectedFactura] = useState(null);
-  const [itens, setItens] = useState([{ produto_id: '', quantidade: '', preco: '' }]);
+  const [itens, setItens] = useState([{ produto_id: '', quantidade: 1, preco: 0 }]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
@@ -116,10 +116,7 @@ const Facturacao = () => {
 
   const fetchFacturaItens = async (facturaId) => {
     try {
-      const { data, error } = await supabase
-        .from('factura_itens')
-        .select('*')
-        .eq('factura_id', facturaId);
+      const { data, error } = await supabase.from('factura_itens').select('*').eq('factura_id', facturaId);
       if (error) throw error;
       return data;
     } catch (error) {
@@ -136,12 +133,18 @@ const Facturacao = () => {
 
   const handleNovoFactura = () => {
     setSelectedFactura(null);
-    setItens([{ produto_id: '', quantidade: '', preco: '' }]);
+    setItens([{ produto_id: '', quantidade: 1, preco: 0 }]);
     onOpen();
   };
 
-  const handleEditFactura = (factura) => {
+  const handleEditFactura = async (factura) => {
+    const facturaItens = await fetchFacturaItens(factura.id);
     setSelectedFactura(factura);
+    setItens(facturaItens.map(item => ({
+      produto_id: item.produto_id || item.servico_id,
+      quantidade: item.quantidade,
+      preco: item.preco,
+    })));
     onOpen();
   };
 
@@ -168,38 +171,54 @@ const Facturacao = () => {
     }
   };
 
+  const handleItemChange = (index, field, value) => {
+    const newItens = [...itens];
+    newItens[index][field] = value;
+
+    // Update price if product or service is selected
+    if (field === 'produto_id' && value) {
+      const selectedProduto = produtos.find(prod => prod.id === value);
+      const selectedServico = servicos.find(serv => serv.id === value);
+      newItens[index].preco = selectedProduto?.preco_venda || selectedServico?.preco || 0;
+    }
+
+    setItens(newItens);
+  };
+
+  const addItem = () => {
+    setItens([...itens, { produto_id: '', quantidade: 1, preco: 0 }]);
+  };
+
+  const calculateTotal = () => {
+    return itens.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const facturaData = Object.fromEntries(formData.entries());
-    const total = itens.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
+    facturaData.total = calculateTotal();
 
     try {
       let facturaId;
       if (selectedFactura) {
-        const { data, error } = await supabase
-          .from('facturas')
-          .update({ ...facturaData, total })
-          .eq('id', selectedFactura.id);
+        const { data, error } = await supabase.from('facturas').update(facturaData).eq('id', selectedFactura.id);
         if (error) throw error;
         facturaId = data[0].id;
       } else {
-        const { data, error } = await supabase.from('facturas').insert({ ...facturaData, total });
+        const { data, error } = await supabase.from('facturas').insert(facturaData);
         if (error) throw error;
         facturaId = data[0].id;
       }
 
-      // Handle items
-      await Promise.all(
-        itens.map(async (item) => {
-          const { id, ...itemData } = item;
-          if (id) {
-            await supabase.from('factura_itens').update(itemData).eq('id', id);
-          } else {
-            await supabase.from('factura_itens').insert({ ...itemData, factura_id: facturaId });
-          }
-        })
-      );
+      await Promise.all(itens.map(async (item) => {
+        const itemData = { ...item, factura_id: facturaId };
+        if (item.id) {
+          await supabase.from('factura_itens').update(itemData).eq('id', item.id);
+        } else {
+          await supabase.from('factura_itens').insert(itemData);
+        }
+      }));
 
       toast({
         title: `Factura ${selectedFactura ? 'atualizada' : 'adicionada'} com sucesso`,
@@ -220,24 +239,6 @@ const Facturacao = () => {
         isClosable: true,
       });
     }
-  };
-
-  const handleItemChange = (index, field, value) => {
-    const newItems = [...itens];
-    newItems[index][field] = value;
-
-    // Update price based on selected product or service
-    if (field === 'produto_id' || field === 'servico_id') {
-      const selectedProduct = produtos.find(p => p.id === value);
-      const selectedService = servicos.find(s => s.id === value);
-      newItems[index].preco = selectedProduct ? selectedProduct.preco_venda : selectedService ? selectedService.preco : '';
-    }
-
-    setItens(newItems);
-  };
-
-  const addItem = () => {
-    setItens([...itens, { produto_id: '', quantidade: '', preco: '' }]);
   };
 
   const generatePDF = async (factura) => {
@@ -269,126 +270,138 @@ const Facturacao = () => {
     // Add total
     doc.text(`Total: ${factura.total}`, 20, yOffset);
 
+    // Save
     // Save the PDF
-    doc.save(`proforma_invoice_${factura.id}.pdf`);
+    doc.save(`Proforma_Invoice_${factura.id}.pdf`);
   };
 
   return (
-    <Container maxW="container.xl">
-      <Box display="flex" alignItems="center" justifyContent="space-between" mb={5}>
-        <Heading as="h1" size="xl">Facturação e Pagamentos</Heading>
-        <Button onClick={handleNovoFactura} colorScheme="blue" leftIcon={<FiPlus />}>
-          Nova Factura
-        </Button>
-      </Box>
-      <Table variant="simple">
-        <Thead>
-          <Tr>
-            <Th>ID</Th>
-            <Th>Cliente</Th>
-            <Th>Data</Th>
-            <Th>Total</Th>
-            <Th>Ações</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {facturas.map((factura) => (
-            <Tr key={factura.id}>
-              <Td>{factura.id}</Td>
-              <Td>{clientes.find((c) => c.id === factura.cliente_id)?.nome || 'N/A'}</Td>
-              <Td>{new Date(factura.data).toLocaleDateString()}</Td>
-              <Td>{factura.total}</Td>
-              <Td>
-                <IconButton
-                  icon={<FiEdit />}
-                  onClick={() => handleEditFactura(factura)}
-                  mr={2}
-                />
-                <IconButton
-                  icon={<FiTrash2 />}
-                  onClick={() => handleDeleteFactura(factura.id)}
-                  mr={2}
-                />
-                <IconButton
-                  icon={<FiPrinter />}
-                  onClick={() => generatePDF(factura)}
-                />
-              </Td>
+    <Container maxW="container.xl" py={4}>
+      <Heading as="h1" mb={4}>Facturação e Pagamentos</Heading>
+      <Button leftIcon={<FiPlus />} colorScheme="teal" onClick={handleNovoFactura}>
+        Nova Factura
+      </Button>
+      <Box mt={4}>
+        <Table variant="simple">
+          <Thead>
+            <Tr>
+              <Th>ID</Th>
+              <Th>Cliente</Th>
+              <Th>Data</Th>
+              <Th>Total</Th>
+              <Th>Ações</Th>
             </Tr>
-          ))}
-        </Tbody>
-      </Table>
-      <Modal isOpen={isOpen} onClose={onClose} size="xl">
+          </Thead>
+          <Tbody>
+            {facturas.map(factura => (
+              <Tr key={factura.id}>
+                <Td>{factura.id}</Td>
+                <Td>{clientes.find(cliente => cliente.id === factura.cliente_id)?.nome}</Td>
+                <Td>{new Date(factura.data).toLocaleDateString()}</Td>
+                <Td>{factura.total}</Td>
+                <Td>
+                  <IconButton
+                    icon={<FiEdit />}
+                    onClick={() => handleEditFactura(factura)}
+                    mr={2}
+                  />
+                  <IconButton
+                    icon={<FiTrash2 />}
+                    colorScheme="red"
+                    onClick={() => handleDeleteFactura(factura.id)}
+                    mr={2}
+                  />
+                  <IconButton
+                    icon={<FiPrinter />}
+                    colorScheme="blue"
+                    onClick={() => generatePDF(factura)}
+                  />
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </Box>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>{selectedFactura ? 'Editar Factura' : 'Nova Factura'}</ModalHeader>
           <ModalCloseButton />
-          <ModalBody>
-            <form id="factura-form" onSubmit={handleSubmit}>
-              <FormControl id="cliente_id" isRequired mb={3}>
+          <form onSubmit={handleSubmit}>
+            <ModalBody>
+              <FormControl mb={4}>
                 <FormLabel>Cliente</FormLabel>
-                <Select name="cliente_id" defaultValue={selectedFactura?.cliente_id || ''}>
-                  <option value="">Selecione um cliente</option>
-                  {clientes.map((cliente) => (
+                <Select name="cliente_id" defaultValue={selectedFactura?.cliente_id || ''} required>
+                  {clientes.map(cliente => (
                     <option key={cliente.id} value={cliente.id}>
                       {cliente.nome}
                     </option>
                   ))}
                 </Select>
               </FormControl>
-              {itens.map((item, index) => (
-                <Box key={index} mb={3} p={3} borderWidth="1px" borderRadius="md">
-                  <FormControl id={`produto_id_${index}`} mb={3}>
-                    <FormLabel>Produto ou Serviço</FormLabel>
-                    <Select
-                      name={`produto_id_${index}`}
-                      value={item.produto_id}
-                      onChange={(e) => handleItemChange(index, 'produto_id', e.target.value)}
-                    >
-                      <option value="">Selecione um produto ou serviço</option>
-                      {produtos.map((produto) => (
-                        <option key={produto.id} value={produto.id}>
-                          {produto.nome}
-                        </option>
-                      ))}
-                      {servicos.map((servico) => (
-                        <option key={servico.id} value={servico.id}>
-                          {servico.titulo}
-                        </option>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <FormControl id={`quantidade_${index}`} mb={3}>
-                    <FormLabel>Quantidade</FormLabel>
-                    <Input
-                      name={`quantidade_${index}`}
-                      type="number"
-                      value={item.quantidade}
-                      onChange={(e) => handleItemChange(index, 'quantidade', e.target.value)}
-                    />
-                  </FormControl>
-                  <FormControl id={`preco_${index}`} mb={3}>
-                    <FormLabel>Preço</FormLabel>
-                    <Input
-                      name={`preco_${index}`}
-                      type="number"
-                      value={item.preco}
-                      readOnly
-                    />
-                  </FormControl>
-                </Box>
-              ))}
-              <Button onClick={addItem} colorScheme="blue" leftIcon={<FiPlus />} mb={3}>
-                Adicionar Item
+              <FormControl mb={4}>
+                <FormLabel>Data</FormLabel>
+                <Input type="date" name="data" defaultValue={selectedFactura?.data.split('T')[0] || ''} required />
+              </FormControl>
+              <FormControl mb={4}>
+                <FormLabel>Itens</FormLabel>
+                {itens.map((item, index) =>{itens.map((item, index) => (
+                  <Box key={index} mb={4} borderWidth={1} borderRadius="md" p={4}>
+                    <FormControl mb={2}>
+                      <FormLabel>Produto ou Serviço</FormLabel>
+                      <Select
+                        value={item.produto_id}
+                        onChange={(e) => handleItemChange(index, 'produto_id', e.target.value)}
+                        required
+                      >
+                        <option value="" disabled>Selecione um produto ou serviço</option>
+                        {produtos.map(produto => (
+                          <option key={produto.id} value={produto.id}>
+                            {produto.nome} (Produto)
+                          </option>
+                        ))}
+                        {servicos.map(servico => (
+                          <option key={servico.id} value={servico.id}>
+                            {servico.titulo} (Serviço)
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <FormControl mb={2}>
+                      <FormLabel>Quantidade</FormLabel>
+                      <Input
+                        type="number"
+                        value={item.quantidade}
+                        onChange={(e) => handleItemChange(index, 'quantidade', parseInt(e.target.value))}
+                        required
+                      />
+                    </FormControl>
+                    <FormControl mb={2}>
+                      <FormLabel>Preço</FormLabel>
+                      <Input
+                        type="number"
+                        value={item.preco}
+                        onChange={(e) => handleItemChange(index, 'preco', parseFloat(e.target.value))}
+                        readOnly
+                      />
+                    </FormControl>
+                  </Box>
+                ))}
+                <Button leftIcon={<FiPlus />} onClick={addItem}>
+                  Adicionar Item
+                </Button>
+              </FormControl>
+            </ModalBody>
+            <ModalFooter>
+              <Button onClick={onClose} mr={3}>
+                Cancelar
               </Button>
-            </form>
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={onClose} mr={3}>Cancelar</Button>
-            <Button form="factura-form" type="submit" colorScheme="blue">
-              {selectedFactura ? 'Atualizar Factura' : 'Criar Factura'}
-            </Button>
-          </ModalFooter>
+              <Button colorScheme="teal" type="submit">
+                {selectedFactura ? 'Atualizar' : 'Adicionar'}
+              </Button>
+            </ModalFooter>
+          </form>
         </ModalContent>
       </Modal>
     </Container>
