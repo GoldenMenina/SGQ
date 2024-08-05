@@ -54,7 +54,6 @@ const Facturacao = () => {
       if (error) throw error;
       setFacturas(data);
     } catch (error) {
-      setFacturas([])
       console.error('Erro ao buscar facturas:', error);
       toast({
         title: 'Erro ao buscar facturas',
@@ -123,7 +122,6 @@ const Facturacao = () => {
       if (error) throw error;
       return data;
     } catch (error) {
-      
       console.error('Erro ao buscar itens da factura:', error);
       toast({
         title: 'Erro ao buscar itens da factura',
@@ -196,7 +194,8 @@ const Facturacao = () => {
   const calculateTotal = () => {
     return itens.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
   };
-const handleSubmit = async (event) => {
+
+  const handleSubmit = async (event) => {
   event.preventDefault();
   const formData = new FormData(event.target);
   const facturaData = Object.fromEntries(formData.entries());
@@ -324,6 +323,16 @@ const handleSubmit = async (event) => {
       duration: 3000,
       isClosable: true,
     });
+  }
+};
+const fetchCompanyDetails = async () => {
+  try {
+    const { data, error } = await supabase.from('empresa').select('*').single();
+    if (error) throw error;
+    setEmpresa(data)
+  } catch (error) {
+    console.error('Erro ao buscar informações da empresa:', error);
+    return null;
   }
 };
 
