@@ -54,6 +54,7 @@ const Facturacao = () => {
       if (error) throw error;
       setFacturas(data);
     } catch (error) {
+      setFacturas([])
       console.error('Erro ao buscar facturas:', error);
       toast({
         title: 'Erro ao buscar facturas',
@@ -122,6 +123,7 @@ const Facturacao = () => {
       if (error) throw error;
       return data;
     } catch (error) {
+      
       console.error('Erro ao buscar itens da factura:', error);
       toast({
         title: 'Erro ao buscar itens da factura',
