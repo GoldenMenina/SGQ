@@ -194,8 +194,7 @@ const Facturacao = () => {
   const calculateTotal = () => {
     return itens.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
   };
-
-  const handleSubmit = async (event) => {
+const handleSubmit = async (event) => {
   event.preventDefault();
   const formData = new FormData(event.target);
   const facturaData = Object.fromEntries(formData.entries());
@@ -213,7 +212,7 @@ const Facturacao = () => {
 
   // Assuming calculateTotal is a function that returns the total value
   facturaData.total = calculateTotal();
-  
+
   // Optional: Check for valid status
   const validStatuses = ['proforma', 'invoice', 'paid'];
   if (!validStatuses.includes(facturaData.status)) {
@@ -259,7 +258,7 @@ const Facturacao = () => {
     // Handle factura_itens
     for (const item of itens) {
       const itemData = { ...item, factura_id: facturaId };
-      
+
       // Ensure quantity and price are valid
       if (itemData.quantidade <= 0) {
         return toast({
@@ -279,13 +278,22 @@ const Facturacao = () => {
           isClosable: true,
         });
       }
-      
-      if (item.id) {
+
+      // Check for existing item with the same factura_id and produto_id/servico_id
+      const existingItem = await supabase
+        .from('factura_itens')
+        .select('*')
+        .eq('factura_id', facturaId)
+        .eq('produto_id', itemData.produto_id)
+        .single();
+
+      if (existingItem) {
         // Update existing item
         const { error } = await supabase
           .from('factura_itens')
           .update(itemData)
-          .eq('id', item.id);
+          .eq('factura_id', existingItem.factura_id)
+          .eq('produto_id', existingItem.produto_id);
         if (error) throw error;
       } else {
         // Insert new item
