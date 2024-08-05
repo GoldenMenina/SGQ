@@ -346,8 +346,9 @@ const Facturacao = () => {
               </FormControl>
               <FormControl mb={4}>
                 <FormLabel>Itens</FormLabel>
-                {itens.map((item, index) =>{itens.map((item, index) => (
-                  <Box key={index} mb={4} borderWidth={1} borderRadius="md" p={4}>
+                {itens.map((item, index) => (
+  <Box key={index} mb={4} borderWidth={1} borderRadius="md" p={4}>
+    {
                     <FormControl mb={2}>
                       <FormLabel>Produto ou Serviço</FormLabel>
                       <Select
@@ -386,8 +387,9 @@ const Facturacao = () => {
                         readOnly
                       />
                     </FormControl>
-                  </Box>
+                  }</Box>
                 ))}
+                
                 <Button leftIcon={<FiPlus />} onClick={addItem}>
                   Adicionar Item
                 </Button>
