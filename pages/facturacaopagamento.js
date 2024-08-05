@@ -242,39 +242,95 @@ const Facturacao = () => {
   };
 
   const generatePDF = async (factura) => {
-    const doc = new jsPDF();
-    const itens = await fetchFacturaItens(factura.id);
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  });
 
-    // Add title
-    doc.text("Proforma Invoice", 20, 20);
+  const itens = await fetchFacturaItens(factura.id);
+  const cliente = clientes.find((c) => c.id === factura.cliente_id);
 
-    // Add client info
-    const cliente = clientes.find((c) => c.id === factura.cliente_id);
-    if (cliente) {
-      doc.text(`Client Name: ${cliente.nome}`, 20, 30);
-      doc.text(`Client Email: ${cliente.email}`, 20, 40);
-      doc.text(`Client Phone: ${cliente.telefone}`, 20, 50);
-    }
+  // Set colors
+  const primaryColor = '#3498db';
+  const secondaryColor = '#2c3e50';
 
-    // Add invoice items
-    let yOffset = 60;
-    itens.forEach((item, index) => {
-      const produto = produtos.find((p) => p.id === item.produto_id);
-      const servico = servicos.find((s) => s.id === item.servico_id);
-      doc.text(`Item ${index + 1}: ${produto ? produto.nome : servico ? servico.titulo : 'N/A'}`, 20, yOffset);
-      doc.text(`Quantidade: ${item.quantidade}`, 20, yOffset + 10);
-      doc.text(`Preço: ${item.preco}`, 20, yOffset + 20);
-      yOffset += 30;
-    });
+  // Add logo (replace with your actual logo)
+  doc.addImage('https://picsum.photos/200/100', 'PNG', 10, 10, 50, 20);
 
-    // Add total
-    doc.text(`Total: ${factura.total}`, 20, yOffset);
+  // Add title
+  doc.setFontSize(24);
+  doc.setTextColor(primaryColor);
+  doc.text("PROFORMA INVOICE", 200, 20, { align: 'right' });
 
-    // Save
-    // Save the PDF
-    doc.save(`Proforma_Invoice_${factura.id}.pdf`);
-  };
+  // Add invoice details
+  doc.setFontSize(10);
+  doc.setTextColor(secondaryColor);
+  doc.text(`Invoice No: INV-${factura.id.toString().padStart(4, '0')}`, 200, 30, { align: 'right' });
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, 200, 35, { align: 'right' });
+  doc.text(`Due Date: ${new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString()}`, 200, 40, { align: 'right' });
 
+  // Add company info
+  doc.setFontSize(12);
+  doc.text("Your Company Name", 10, 50);
+  doc.setFontSize(10);
+  doc.text("123 Business Street, City, Country", 10, 55);
+  doc.text("Phone: +1 234 567 890", 10, 60);
+  doc.text("Email: info@yourcompany.com", 10, 65);
+
+  // Add client info
+  if (cliente) {
+    doc.setFontSize(12);
+    doc.text("Bill To:", 10, 80);
+    doc.setFontSize(10);
+    doc.text(cliente.nome, 10, 85);
+    doc.text(cliente.email, 10, 90);
+    doc.text(cliente.telefone, 10, 95);
+  }
+
+  // Add table header
+  let yOffset = 110;
+  doc.setFillColor(primaryColor);
+  doc.rect(10, yOffset, 190, 10, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.text("Item", 15, yOffset + 7);
+  doc.text("Quantity", 100, yOffset + 7);
+  doc.text("Price", 130, yOffset + 7);
+  doc.text("Total", 170, yOffset + 7);
+
+  // Add invoice items
+  yOffset += 15;
+  doc.setTextColor(secondaryColor);
+  itens.forEach((item, index) => {
+    const produto = produtos.find((p) => p.id === item.produto_id);
+    const servico = servicos.find((s) => s.id === item.servico_id);
+    const itemName = produto ? produto.nome : servico ? servico.titulo : 'N/A';
+    const itemTotal = item.quantidade * item.preco;
+
+    doc.text(itemName, 15, yOffset);
+    doc.text(item.quantidade.toString(), 105, yOffset);
+    doc.text(`$${item.preco.toFixed(2)}`, 135, yOffset);
+    doc.text(`$${itemTotal.toFixed(2)}`, 175, yOffset);
+
+    yOffset += 10;
+  });
+
+  // Add total
+  yOffset += 10;
+  doc.setFillColor(primaryColor);
+  doc.rect(130, yOffset, 70, 10, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.text("Total:", 135, yOffset + 7);
+  doc.text(`$${factura.total.toFixed(2)}`, 175, yOffset + 7);
+
+  // Add footer
+  doc.setTextColor(secondaryColor);
+  doc.setFontSize(8);
+  doc.text("Thank you for your business!", 105, 280, { align: 'center' });
+
+  // Save the PDF
+  doc.save(`Proforma_Invoice_${factura.id}.pdf`);
+};
   return (
     <Container maxW="container.xl" py={4}>
       <Heading as="h1" mb={4}>Facturação e Pagamentos</Heading>
