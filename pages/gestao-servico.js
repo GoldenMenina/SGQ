@@ -28,6 +28,7 @@ import {
 } from '@chakra-ui/react';
 import { FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
 
+
 const GestaoServicos = () => {
   const [servicos, setServicos] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
