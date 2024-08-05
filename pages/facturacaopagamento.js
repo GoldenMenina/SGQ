@@ -201,7 +201,7 @@ const Facturacao = () => {
     const facturaData = Object.fromEntries(formData.entries());
     facturaData.total = calculateTotal();
 
-    try {
+   /* try { */
       let facturaId;
       if (selectedFactura) {
         const { data, error } = await supabase.from('facturas').update(facturaData).eq('id', selectedFactura.id);
@@ -231,7 +231,7 @@ const Facturacao = () => {
 
       onClose();
       fetchFacturas();
-    } catch (error) {
+  /*  } catch (error) {
       console.error(error);
       toast({
         title: `Erro ao ${selectedFactura ? 'atualizar' : 'adicionar'} factura`,
@@ -239,7 +239,7 @@ const Facturacao = () => {
         status: 'error',
         duration: 3000,
         isClosable: true,
-      });
+      });*/
     }
   };
   const fetchCompanyDetails = async () => {
