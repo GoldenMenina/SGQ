@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb';
 
 export default async function handler(req, res) {
   const client = await clientPromise;
-  const db = client.db('your_database_name');
+  const db = client.db('sgq');
   const collection = db.collection('servicos');
   const { id } = req.query;
 
