@@ -199,7 +199,7 @@ const Facturacao = () => {
   event.preventDefault();
   const formData = new FormData(event.target);
   const facturaData = Object.fromEntries(formData.entries());
-
+facturaData.total = calculateTotal();
   // Ensure total is non-negative and calculate total if necessary
   if (isNaN(facturaData.total) || parseFloat(facturaData.total) < 0) {
     return toast({
@@ -212,7 +212,7 @@ const Facturacao = () => {
   }
 
   // Assuming calculateTotal is a function that returns the total value
-  facturaData.total = calculateTotal();
+  
 
   // Optional: Check for valid status
   const validStatuses = ['proforma', 'invoice', 'paid'];
