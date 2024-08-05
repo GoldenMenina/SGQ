@@ -208,9 +208,12 @@ const Facturacao = () => {
         if (error) throw error;
         facturaId = data[0].id;
       } else {
-        const { data, error } = await supabase.from('facturas').insert(facturaData);
-        if (error) throw error;
-        facturaId = data[0].id;
+      const { data, error } = await supabase.from('facturas').insert(facturaData).select();
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error('Factura was inserted but no data was returned');
+      }
+      facturaId = data[0].id;
       }
 
       await Promise.all(itens.map(async (item) => {
