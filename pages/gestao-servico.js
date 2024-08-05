@@ -27,7 +27,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
-import supabase from '../lib/supabaseClient';
+import supabase from '../lib/su';
 
 const GestaoServicos = () => {
   const [servicos, setServicos] = useState([]);
@@ -43,17 +43,12 @@ const GestaoServicos = () => {
     fetchServicos();
   }, [currentPage]);
 
-  const fetchServicos = async () => {
+
+const fetchServicos = async () => {
     try {
-      const { data, error, count } = await supabase
-        .from('serviços')
-        .select('*', { count: 'exact' })
-        .range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
-
-      if (error) throw error;
-
-      setServicos(data);
-      setTotalPages(Math.ceil(count / itemsPerPage));
+      const response = await axios.get(`/api/servicos?page=${currentPage}&limit=${itemsPerPage}`);
+      setServicos(response.data.servicos);
+      setTotalPages(Math.ceil(response.data.total / itemsPerPage));
     } catch (error) {
       console.error('Erro ao buscar serviços:', error);
       toast({
@@ -66,6 +61,7 @@ const GestaoServicos = () => {
     }
   };
 
+
   const handleNovoServico = () => {
     setSelectedServico(null);
     onOpen();
@@ -76,74 +72,64 @@ const GestaoServicos = () => {
     onOpen();
   };
 
-  const handleDeleteServico = async (id) => {
-    try {
-      const { error } = await supabase.from('serviços').delete().eq('id', id);
-      if (error) throw error;
-
-      toast({
-        title: 'Serviço excluído com sucesso',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-      fetchServicos();
-    } catch (error) {
-      toast({
-        title: 'Erro ao excluir serviço',
-        description: error.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const servicoData = Object.fromEntries(formData.entries());
-
-    try {
-      if (selectedServico) {
-        const { error } = await supabase
-          .from('serviços')
-          .update(servicoData)
-          .eq('id', selectedServico.id);
-        if (error) throw error;
-
+   const handleDeleteServico = async (id) => {
+      try {
+        await axios.delete(`/api/servicos/${id}`);
         toast({
-          title: 'Serviço atualizado com sucesso',
+          title: 'Serviço excluído com sucesso',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
-      } else {
-        const { error } = await supabase.from('serviços').insert(servicoData);
-        if (error) throw error;
-
+        fetchServicos();
+      } catch (error) {
         toast({
-          title: 'Serviço adicionado com sucesso',
-          status: 'success',
+          title: 'Erro ao excluir serviço',
+          description: error.message,
+          status: 'error',
           duration: 3000,
           isClosable: true,
         });
       }
-
-      onClose();
-      fetchServicos();
-    } catch (error) {
-      console.error(error);
-      toast({
-        title: `Erro ao ${selectedServico ? 'atualizar' : 'adicionar'} serviço`,
-        description: error.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-
+    };
+  
+    const handleSubmit = async (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const servicoData = Object.fromEntries(formData.entries());
+  
+      try {
+        if (selectedServico) {
+          await axios.put(`/api/servicos/${selectedServico._id}`, servicoData);
+          toast({
+            title: 'Serviço atualizado com sucesso',
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+          });
+        } else {
+          await axios.post('/api/servicos', servicoData);
+          toast({
+            title: 'Serviço adicionado com sucesso',
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+          });
+        }
+  
+        onClose();
+        fetchServicos();
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: `Erro ao ${selectedServico ? 'atualizar' : 'adicionar'} serviço`,
+          description: error.message,
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    };
   return (
     <Container maxW="container.xl">
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={5}>
