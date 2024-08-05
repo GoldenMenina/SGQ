@@ -349,6 +349,7 @@ const Facturacao = () => {
                 {itens.map((item, index) => (
   <Box key={index} mb={4} borderWidth={1} borderRadius="md" p={4}>
     {
+    <>
                     <FormControl mb={2}>
                       <FormLabel>Produto ou Serviço</FormLabel>
                       <Select
@@ -387,6 +388,7 @@ const Facturacao = () => {
                         readOnly
                       />
                     </FormControl>
+                    </>
                   }</Box>
                 ))}
                 
