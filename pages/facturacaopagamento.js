@@ -34,6 +34,7 @@ const Facturacao = () => {
   const [clientes, setClientes] = useState([]);
   const [produtos, setProdutos] = useState([]);
   const [servicos, setServicos] = useState([]);
+  const [empresa, setEmpresa] = useState([]);
   const [selectedFactura, setSelectedFactura] = useState(null);
   const [itens, setItens] = useState([{ produto_id: '', quantidade: 1, preco: 0 }]);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -44,6 +45,7 @@ const Facturacao = () => {
     fetchClientes();
     fetchProdutos();
     fetchServicos();
+    fetchCompanyDetails();
   }, []);
 
   const fetchFacturas = async () => {
@@ -240,6 +242,16 @@ const Facturacao = () => {
       });
     }
   };
+  const fetchCompanyDetails = async () => {
+  try {
+    const { data, error } = await supabase.from('empresa').select('*').single();
+    if (error) throw error;
+    setEmpresa(data)
+  } catch (error) {
+    console.error('Erro ao buscar informações da empresa:', error);
+    return null;
+  }
+};
 
   const generatePDF = async (factura) => {
   const doc = new jsPDF({
@@ -255,33 +267,33 @@ const Facturacao = () => {
   const primaryColor = '#3498db';
   const secondaryColor = '#2c3e50';
 
-  // Add logo (replace with your actual logo)
-  doc.addImage('https://picsum.photos/200/100', 'PNG', 10, 10, 50, 20);
+  // Add logo
+  doc.addImage(empresa.foto_url || 'https://picsum.photos/200/100', 'JPEG', 10, 10, 50, 25);
 
   // Add title
   doc.setFontSize(24);
   doc.setTextColor(primaryColor);
-  doc.text("PROFORMA INVOICE", 200, 20, { align: 'right' });
+  doc.text("FATURA PROFORMA", 200, 20, { align: 'right' });
 
   // Add invoice details
   doc.setFontSize(10);
   doc.setTextColor(secondaryColor);
-  doc.text(`Invoice No: INV-${factura.id.toString().padStart(4, '0')}`, 200, 30, { align: 'right' });
-  doc.text(`Date: ${new Date().toLocaleDateString()}`, 200, 35, { align: 'right' });
-  doc.text(`Due Date: ${new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString()}`, 200, 40, { align: 'right' });
+  doc.text(`Fatura Nº: FAT-${factura.id.toString().padStart(4, '0')}`, 200, 30, { align: 'right' });
+  doc.text(`Data: ${new Date().toLocaleDateString('pt-PT')}`, 200, 35, { align: 'right' });
+  doc.text(`Data de Vencimento: ${new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString('pt-PT')}`, 200, 40, { align: 'right' });
 
   // Add company info
   doc.setFontSize(12);
-  doc.text("Your Company Name", 10, 50);
+  doc.text(empresa.nome, 10, 50);
   doc.setFontSize(10);
-  doc.text("123 Business Street, City, Country", 10, 55);
-  doc.text("Phone: +1 234 567 890", 10, 60);
-  doc.text("Email: info@yourcompany.com", 10, 65);
+  doc.text(empresa.endereco, 10, 55);
+  doc.text(empresa.telefone, 10, 60);
+  doc.text(empresa.email, 10, 65);
 
   // Add client info
   if (cliente) {
     doc.setFontSize(12);
-    doc.text("Bill To:", 10, 80);
+    doc.text("Faturar para:", 10, 80);
     doc.setFontSize(10);
     doc.text(cliente.nome, 10, 85);
     doc.text(cliente.email, 10, 90);
@@ -294,8 +306,8 @@ const Facturacao = () => {
   doc.rect(10, yOffset, 190, 10, 'F');
   doc.setTextColor(255, 255, 255);
   doc.text("Item", 15, yOffset + 7);
-  doc.text("Quantity", 100, yOffset + 7);
-  doc.text("Price", 130, yOffset + 7);
+  doc.text("Quantidade", 100, yOffset + 7);
+  doc.text("Preço", 130, yOffset + 7);
   doc.text("Total", 170, yOffset + 7);
 
   // Add invoice items
@@ -309,8 +321,8 @@ const Facturacao = () => {
 
     doc.text(itemName, 15, yOffset);
     doc.text(item.quantidade.toString(), 105, yOffset);
-    doc.text(`$${item.preco.toFixed(2)}`, 135, yOffset);
-    doc.text(`$${itemTotal.toFixed(2)}`, 175, yOffset);
+    doc.text(`${item.preco.toFixed(2)} Kz`, 135, yOffset);
+    doc.text(`${itemTotal.toFixed(2)} Kz`, 175, yOffset);
 
     yOffset += 10;
   });
@@ -321,15 +333,30 @@ const Facturacao = () => {
   doc.rect(130, yOffset, 70, 10, 'F');
   doc.setTextColor(255, 255, 255);
   doc.text("Total:", 135, yOffset + 7);
-  doc.text(`$${factura.total.toFixed(2)}`, 175, yOffset + 7);
+  doc.text(`${factura.total.toFixed(2)} Kz`, 175, yOffset + 7);
+
+  // Add payment information
+  yOffset += 20;
+  doc.setTextColor(secondaryColor);
+  doc.setFontSize(12);
+  doc.text("Formas de Pagamento", 10, yOffset);
+  doc.setFontSize(10);
+  yOffset += 7;
+  doc.text("Transferência Bancária:", 10, yOffset);
+  yOffset += 5;
+  doc.text("Banco "+empresa.banco_nome, 15, yOffset);
+  yOffset += 5;
+  doc.text(empresa.banco_iban, 15, yOffset);
+  yOffset += 5;
+  doc.text("BIC/SWIFT: "+empresa.banco_bic, 15, yOffset);
 
   // Add footer
   doc.setTextColor(secondaryColor);
   doc.setFontSize(8);
-  doc.text("Thank you for your business!", 105, 280, { align: 'center' });
+  doc.text("Obrigado pela sua preferência!", 105, 280, { align: 'center' });
 
   // Save the PDF
-  doc.save(`Proforma_Invoice_${factura.id}.pdf`);
+  doc.save(`Fatura_Proforma_${factura.id}.pdf`);
 };
   return (
     <Container maxW="container.xl" py={4}>
