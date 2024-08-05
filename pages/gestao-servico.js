@@ -27,6 +27,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
+import axios from 'axios';
 
 
 const GestaoServicos = () => {
