@@ -133,7 +133,7 @@ const Facturacao = () => {
 
   const handleNovoFactura = () => {
     setSelectedFactura(null);
-    setItens([{ produto_id: '', quantidade: 1, preco: 0 }]);
+    setItens([{ produto_id: '', quantidade: 1, preco: 0, status:"Proforma" }]);
     onOpen();
   };
 
