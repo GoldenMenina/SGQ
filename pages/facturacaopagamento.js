@@ -216,7 +216,7 @@ const Facturacao = () => {
       facturaId = data[0].id;
       }
 
-      await Promise.all(itens.map(async (item) => {
+      await Promise.all(itens.map(async (item) => { consol.log(item)
         const itemData = { ...item, factura_id: facturaId };
         if (item.id) {
           await supabase.from('factura_itens').update(itemData).eq('id', item.id);
