@@ -133,7 +133,7 @@ const Facturacao = () => {
 
   const handleNovoFactura = () => {
     setSelectedFactura(null);
-    setItens([{ produto_id: '', quantidade: 1, preco: 0, status:"Proforma" }]);
+    setItens([{ produto_id: '', quantidade: 1, preco: 0}]);
     onOpen();
   };
 
@@ -338,6 +338,13 @@ const Facturacao = () => {
                       {cliente.nome}
                     </option>
                   ))}
+                </Select>
+              </FormControl><FormControl id="status" mb={4} isRequired>
+                <FormLabel>Status</FormLabel>
+                <Select name="status" defaultValue={selectedFactura?.status || ''}>
+                  <option value="Proforma">Proforma</option>
+                  <option value="Invoice">Invoice</option>
+                  <option value="Paid">Paid</option>
                 </Select>
               </FormControl>
               <FormControl mb={4}>
