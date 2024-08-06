@@ -27,14 +27,14 @@ import {
 } from '@chakra-ui/react';
 import { FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
 import axios from 'axios';
-
+import { supabase } from './supabaseClient';  // Add this line to import supabase
 
 const GestaoFuncionarios = () => {
   const [funcionarios, setFuncionarios] = useState([]);
   const [selectedFuncionario, setSelectedFuncionario] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
-      const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -44,12 +44,12 @@ const GestaoFuncionarios = () => {
   }, [currentPage]);
 
   const fetchFuncionarios = async () => {
-      try {
+    try {
       const response = await axios.get(`/api/funcionarios?page=${currentPage}&limit=${itemsPerPage}`);
-      setFuncionarios(response.data.servicos);
+      setFuncionarios(response.data.funcionarios);
       setTotalPages(Math.ceil(response.data.total / itemsPerPage));
     } catch (error) {
-      console.error('Erro ao buscar serviços:', error);
+      console.error('Erro ao buscar funcionários:', error);
       toast({
         title: 'Erro ao buscar funcionários',
         description: error.message,
@@ -58,7 +58,6 @@ const GestaoFuncionarios = () => {
         isClosable: true,
       });
     }
-
   };
 
   const handleNovoFuncionario = () => {
@@ -73,11 +72,9 @@ const GestaoFuncionarios = () => {
 
   const handleDeleteFuncionario = async (id) => {
     try {
-      const { error } = await supabase.from('usuarios').delete().eq('id', id);
-      if (error) throw error;
-
+      await axios.delete(`/api/funcionarios/${id}`);
       toast({
-        title: 'Funcionário excluído com sucesso',
+        title: 'Serviço excluído com sucesso',
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -85,7 +82,7 @@ const GestaoFuncionarios = () => {
       fetchFuncionarios();
     } catch (error) {
       toast({
-        title: 'Erro ao excluir funcionário',
+        title: 'Erro ao excluir serviço',
         description: error.message,
         status: 'error',
         duration: 3000,
@@ -94,43 +91,45 @@ const GestaoFuncionarios = () => {
     }
   };
 
-  const handleSubmit = async (event) => {setLoading(true)
-      event.preventDefault();
-      const formData = new FormData(event.target);
-      const funcionarioData = Object.fromEntries(formData.entries());
-  
-      try {
-        if (selectedFuncionario) {
-          await axios.put(`/api/funcionarios/${selectedFuncionario._id}`, funcionarioData);
-          toast({
-            title: 'Funcionário atualizado com sucesso',
-            status: 'success',
-            duration: 3000,
-            isClosable: true,
-          });
-        } else {
-          await axios.post('/api/funcionarios', funcionarioData);
-          toast({
-            title: ' funcionário adicionado com sucesso',
-            status: 'success',
-            duration: 3000,
-            isClosable: true,
-          });
-        }
-  
-        onClose();
-        fetchServicos();
-        setLoading(false)
-      } catch (error) {
-        console.error(error);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    const formData = new FormData(event.target);
+    const funcionarioData = Object.fromEntries(formData.entries());
+
+    try {
+      if (selectedFuncionario) {
+        await axios.put(`/api/funcionarios/${selectedFuncionario._id}`, funcionarioData);
         toast({
-          title: `Erro ao ${selectedServico ? 'atualizar' : 'adicionar'} funcionário`,
-          description: error.message,
-          status: 'error',
+          title: 'Funcionário atualizado com sucesso',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        await axios.post('/api/funcionarios', funcionarioData);
+        toast({
+          title: 'Funcionário adicionado com sucesso',
+          status: 'success',
           duration: 3000,
           isClosable: true,
         });
       }
+
+      onClose();
+      fetchFuncionarios();
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: `Erro ao ${selectedFuncionario ? 'atualizar' : 'adicionar'} funcionário`,
+        description: error.message,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -217,14 +216,15 @@ const GestaoFuncionarios = () => {
               </FormControl>
             </ModalBody>
             <ModalFooter>
-           { loading ? (
-             <Button colorScheme="blue" mr={3} disabled>
-                            Aguarde
-                          </Button>
-            ): ( <Button colorScheme="blue" mr={3} type="submit">
-                Salvar
-              </Button>)}
-         
+              {loading ? (
+                <Button colorScheme="blue" mr={3} disabled>
+                  Aguarde
+                </Button>
+              ) : (
+                <Button colorScheme="blue" mr={3} type="submit">
+                  Salvar
+                </Button>
+              )}
               <Button onClick={onClose}>Cancelar</Button>
             </ModalFooter>
           </form>
@@ -235,5 +235,3 @@ const GestaoFuncionarios = () => {
 };
 
 export default GestaoFuncionarios;
-
-
