@@ -12,6 +12,7 @@ import {
   Image,
 } from '@chakra-ui/react';
 import supabase from '../lib/supabaseClient';
+import axios from 'axios'
 
 const Empresa = () => {
   const [empresa, setEmpresa] = useState({
