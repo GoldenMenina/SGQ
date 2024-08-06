@@ -1,5 +1,6 @@
 // components/Layout.js
 import { useEffect, useState } from 'react'
+import Link from "next/link";
 import { useRouter } from 'next/router'
 import {
   Box,
@@ -161,11 +162,12 @@ return (
                 <DrawerBody>
                   <VStack align="stretch" spacing={2}>
                     {navLinks.map((link) => (
-                    
+                    <Link href={link.href} >
+                    <>
                       <Button
                         key={link.href}
                         as="a"
-                        href={link.href}
+                        href="#"
                         variant="ghost"
                         justifyContent="flex-start"
                         fontWeight="normal"
@@ -177,6 +179,8 @@ return (
                       >
                         {link.label}
                       </Button>
+                      </>
+                      </Link>
                     ))}
                   </VStack>
                 </DrawerBody>
