@@ -29,6 +29,8 @@ import { FiPlus, FiEdit, FiTrash2, FiPrinter } from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import supabase from '../lib/supabaseClient';
 
+import axios from 'axios'
+
 const Facturacao = () => {
   const [facturas, setFacturas] = useState([]);
   const [clientes, setClientes] = useState([]);
