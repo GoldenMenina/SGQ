@@ -33,22 +33,21 @@ const GestaoFuncionarios = () => {
   const [selectedFuncionario, setSelectedFuncionario] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
+      const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    fetchFuncionarios();
-  }, []);
+    fetchFuncionari&& os();
+  }, [currentPage]);
 
   const fetchFuncionarios = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('usuarios')
-        .select('*')
-        .order('nome');
-
-      if (error) throw error;
-      setFuncionarios(data);
+      try {
+      const response = await axios.get(`/api/funcionarios?page=${currentPage}&limit=${itemsPerPage}`);
+      setFuncionarios(response.data.servicos);
+      setTotalPages(Math.ceil(response.data.total / itemsPerPage));
     } catch (error) {
-      console.error('Error fetching funcionarios:', error);
+      console.error('Erro ao buscar serviços:', error);
       toast({
         title: 'Erro ao buscar funcionários',
         description: error.message,
@@ -57,6 +56,7 @@ const GestaoFuncionarios = () => {
         isClosable: true,
       });
     }
+
   };
 
   const handleNovoFuncionario = () => {
@@ -92,70 +92,43 @@ const GestaoFuncionarios = () => {
     }
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const funcionarioData = Object.fromEntries(formData.entries());
-
-    try {
-      if (selectedFuncionario) {
-        // Update existing funcionario
-        const { error } = await supabase
-          .from('usuarios')
-          .update(funcionarioData)
-          .eq('id', selectedFuncionario.id);
-        if (error) throw error;
-
+  const handleSubmit = async (event) => {setLoading(true)
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const funcionarioData = Object.fromEntries(formData.entries());
+  
+      try {
+        if (selectedFuncionario) {
+          await axios.put(`/api/funcionarios/${selectedFuncionario._id}`, funcionarioData);
+          toast({
+            title: 'Funcionário atualizado com sucesso',
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+          });
+        } else {
+          await axios.post('/api/funcionarios', funcionarioData);
+          toast({
+            title: ' funcionário adicionado com sucesso',
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+          });
+        }
+  
+        onClose();
+        fetchServicos();
+        setLoading(false)
+      } catch (error) {
+        console.error(error);
         toast({
-          title: 'Funcionário atualizado com sucesso',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-      } else {
-        // Add new funcionario
-        const { data, error } = await supabase.auth.signUp({
-          email: funcionarioData.email,
-          password: funcionarioData.password,
-          options: {
-            data: {
-              nome: funcionarioData.nome,
-              nivel_acesso: funcionarioData.nivel_acesso,
-            },
-          },
-        });
-        if (error) throw error;
-
-        const { error: insertError } = await supabase.from('usuarios').insert({
-          id: data.user.id,
-          nome: funcionarioData.nome,
-          email: funcionarioData.email,
-          telefone: funcionarioData.telefone,
-          endereco: funcionarioData.endereco,
-          nivel_acesso: funcionarioData.nivel_acesso,
-        });
-        if (insertError) throw insertError;
-
-        toast({
-          title: 'Funcionário adicionado com sucesso',
-          status: 'success',
+          title: `Erro ao ${selectedServico ? 'atualizar' : 'adicionar'} funcionário`,
+          description: error.message,
+          status: 'error',
           duration: 3000,
           isClosable: true,
         });
       }
-
-      onClose();
-      fetchFuncionarios();
-    } catch (error) {
-      console.error(error);
-      toast({
-        title: `Erro ao ${selectedFuncionario ? 'atualizar' : 'adicionar'} funcionário`,
-        description: error.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
   };
 
   return (
@@ -242,9 +215,14 @@ const GestaoFuncionarios = () => {
               </FormControl>
             </ModalBody>
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} type="submit">
+           { loading ? (
+             <Button colorScheme="blue" mr={3} disabled>
+                            Aguarde
+                          </Button>
+            ): ( <Button colorScheme="blue" mr={3} type="submit">
                 Salvar
-              </Button>
+              </Button>)}
+         
               <Button onClick={onClose}>Cancelar</Button>
             </ModalFooter>
           </form>
