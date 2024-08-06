@@ -37,8 +37,9 @@ const GestaoFuncionarios = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  const itemsPerPage = 10;
   useEffect(() => {
-    fetchFuncionari&& os();
+    fetchFuncionarios();
   }, [currentPage]);
 
   const fetchFuncionarios = async () => {
