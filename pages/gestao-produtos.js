@@ -27,7 +27,9 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
-import axios from 'axios';
+import  supabase  from '../lib/supabaseClient';
+
+import axios from 'axios'
 
 const GestaoEstoque = () => {
   const [produtos, setProdutos] = useState([]);
@@ -37,8 +39,7 @@ const GestaoEstoque = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 10;
-
+const itemsPerPage = 10;
   useEffect(() => {
     fetchProdutos();
   }, [currentPage]);
@@ -70,7 +71,7 @@ const GestaoEstoque = () => {
       ...produto,
       quantidade: Number(produto.quantidade),
       preco_venda: Number(produto.preco_venda),
-      preco_custo: Number(produto.preco_custo),
+      preco_custo: Number(produto.preco_custo)
     });
     onOpen();
   };
@@ -79,7 +80,7 @@ const GestaoEstoque = () => {
     try {
       await axios.delete(`/api/produtos/${id}`);
       toast({
-        title: 'Produto excluído com sucesso',
+        title: 'Produtos excluído com sucesso',
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -87,7 +88,7 @@ const GestaoEstoque = () => {
       fetchProdutos();
     } catch (error) {
       toast({
-        title: 'Erro ao excluir produto',
+        title: 'Erro ao excluir Produto',
         description: error.message,
         status: 'error',
         duration: 3000,
@@ -101,10 +102,11 @@ const GestaoEstoque = () => {
     setLoading(true);
     const formData = new FormData(event.target);
     const produtoData = Object.fromEntries(formData.entries());
-
+  
+  
     try {
       if (selectedProduto) {
-        await axios.put(`/api/produtos/${selectedProduto._id}`, produtoData);
+        await axios.put(`/api/produtos/${selectedProduto._id}`, produtoInfo);
         toast({
           title: 'Produto atualizado com sucesso',
           status: 'success',
@@ -114,13 +116,13 @@ const GestaoEstoque = () => {
       } else {
         await axios.post('/api/produtos', produtoData);
         toast({
-          title: 'Produto adicionado com sucesso',
+          title: 'Produtos adicionado com sucesso',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
       }
-
+  
       onClose();
       fetchProdutos();
     } catch (error) {
@@ -138,13 +140,17 @@ const GestaoEstoque = () => {
   };
 
   return (
-    <Container>
-      <Heading>Gestão de Estoque</Heading>
-      <Button colorScheme="teal" onClick={handleNovoProduto}>
-        Novo Produto
-      </Button>
+    <Container maxW="container.xl">
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={5}>
+        <Heading as="h1" size="xl">
+          Gestão de Estoque
+        </Heading>
+        <Button leftIcon={<FiPlus />} colorScheme="teal" onClick={handleNovoProduto}>
+          Novo Produto
+        </Button>
+      </Box>
 
-      <Table mt={4}>
+      <Table variant="simple">
         <Thead>
           <Tr>
             <Th>Nome</Th>
@@ -157,7 +163,7 @@ const GestaoEstoque = () => {
         </Thead>
         <Tbody>
           {produtos.map((produto) => (
-            <Tr key={produto._id}>
+            <Tr key={produto.id}>
               <Td>{produto.nome}</Td>
               <Td>{produto.sku}</Td>
               <Td>{produto.quantidade}</Td>
@@ -190,35 +196,52 @@ const GestaoEstoque = () => {
             <ModalBody>
               <FormControl>
                 <FormLabel>Nome</FormLabel>
-                <Input name="nome" defaultValue={selectedProduto?.nome || ''} required />
+                <Input name="nome" defaultValue={selectedProduto?.nome} required />
               </FormControl>
               <FormControl mt={4}>
                 <FormLabel>SKU</FormLabel>
-                <Input name="sku" defaultValue={selectedProduto?.sku || ''} required />
+                <Input name="sku" defaultValue={selectedProduto?.sku} required />
               </FormControl>
               <FormControl mt={4}>
                 <FormLabel>Quantidade</FormLabel>
-                <NumberInput min={0} defaultValue={selectedProduto?.quantidade || 0}>
-                  <NumberInputField name="quantidade" />
+                <NumberInput min={0}>
+                  <NumberInputField 
+                    name="quantidade" 
+                    value={selectedProduto ? selectedProduto.quantidade : ''}
+                    onChange={(e) => setSelectedProduto({...selectedProduto, quantidade: e.target.value})}
+                    required 
+                  />
                 </NumberInput>
-              </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Preço de Custo</FormLabel>
-                <NumberInput min={0} precision={2} defaultValue={selectedProduto?.preco_custo || 0}>
-                  <NumberInputField name="preco_custo" />
-                </NumberInput>
-              </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Preço de Venda</FormLabel>
-                <NumberInput min={0} precision={2} defaultValue={selectedProduto?.preco_venda || 0}>
-                  <NumberInputField name="preco_venda" />
-                </NumberInput>
-              </FormControl>
+              </FormControl> <
+              FormControl mt = { 4 } >
+                <FormLabel>Preço de Custo</FormLabel> <
+                NumberInput min = { 0 } precision = { 2 } >
+                <NumberInputField 
+                    name="preco_custo" 
+                    value={selectedProduto ? selectedProduto.preco_custo : ''}
+                    onChange={(e) => setSelectedProduto({...selectedProduto, preco_custo: e.target.value})}
+                    required 
+                  /> </NumberInput> </FormControl> <FormControl mt = { 4 } >
+                <FormLabel>Preço de Venda</FormLabel> <
+                NumberInput min = { 0 } precision = { 2 } >
+                <NumberInputField 
+                    name="preco_venda" 
+                    value={selectedProduto ? selectedProduto.preco_venda : ''}
+                    onChange={(e) => setSelectedProduto({...selectedProduto, preco_venda: e.target.value})}
+                    required 
+                  /> </NumberInput>
+                </FormControl>
             </ModalBody>
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} type="submit" isLoading={loading}>
-                {loading ? 'Aguarde' : 'Salvar'}
-              </Button>
+               {loading ? (
+                <Button colorScheme="blue" mr={3} disabled>
+                  Aguarde
+                </Button>
+              ) : (
+                <Button colorScheme="blue" mr={3} type="submit">
+                  Salvar
+                </Button>
+              )}
               <Button onClick={onClose}>Cancelar</Button>
             </ModalFooter>
           </form>
