@@ -27,7 +27,7 @@ const Empresa = () => {
   });
   const [file, setFile] = useState(null);
   const toast = useToast();
-
+const [loading, setLoading] = useState(false);
   useEffect(() => {
     fetchEmpresa();
   }, []);
@@ -84,6 +84,7 @@ const Empresa = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true)
 
     let foto_url = empresa.foto_url;
 
@@ -106,7 +107,10 @@ const Empresa = () => {
         duration: 3000,
         isClosable: true,
       });
+      fetchEmpresa()
+      setLoading(false )
     } catch (error) {
+      setLoading(false )
       console.error('Erro ao salvar informações da empresa:', error);
       toast({
         title: 'Erro ao salvar informações da empresa',
@@ -192,9 +196,12 @@ const Empresa = () => {
             onChange={handleChange}
           />
         </FormControl>
-        <Button colorScheme="blue" type="submit">
-          Salvar
-        </Button>
+        {loading? (<Button colorScheme="blue" disabled>
+                  aguarde
+                </Button>):(<Button colorScheme="blue" type="submit">
+                  Salvar
+                </Button>)}
+        
       </form>
     </Container>
   );
