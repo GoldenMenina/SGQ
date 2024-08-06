@@ -17,7 +17,7 @@ export default async function handler(req, res) {
   } else if (req.method === 'POST') {
     const newCliente = req.body;
     const result = await collection.insertOne(newCliente);
-    res.status(201).json(r);
+    res.status(201).json();
   } else {
     res.setHeader('Allow', ['GET', 'POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
