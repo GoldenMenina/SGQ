@@ -206,19 +206,19 @@ const itemsPerPage = 10;
               <FormControl mt={4}>
                 <FormLabel>Quantidade</FormLabel>
                 <NumberInput min={0}>
-                  <NumberInputField name="quantidade" defaultValue={selectedProduto?+selectedProduto.quantidade:undefined} required />
+                  <NumberInputField name="quantidade" defaultValue={selectedProduto?selectedProduto.quantidade:undefined} required />
                 </NumberInput>
               </FormControl>
               <FormControl mt={4}>
                 <FormLabel>Preço de Custo</FormLabel>
                 <NumberInput min={0} precision={2}>
-                  <NumberInputField name="preco_custo" defaultValue={selectedProduto?+selectedProduto.preco_custo:undefined} required />
+                  <NumberInputField name="preco_custo" defaultValue={selectedProduto?selectedProduto.preco_custo:undefined} required />
                 </NumberInput>
               </FormControl>
               <FormControl mt={4}>
                 <FormLabel>Preço de Venda</FormLabel>
                 <NumberInput min={0} precision={2}>
-                  <NumberInputField name="preco_venda" defaultValue={selectedProduto?+selectedProduto.preco_venda:undefined} required />
+                  <NumberInputField name="preco_venda" defaultValue={selectedProduto?selectedProduto.preco_venda:undefined} required />
                 </NumberInput>
               </FormControl>
             </ModalBody>
