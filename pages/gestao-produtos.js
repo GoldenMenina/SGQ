@@ -47,7 +47,7 @@ const itemsPerPage = 10;
   const fetchProdutos = async () => {
     try {
       const response = await axios.get(`/api/produtos?page=${currentPage}&limit=${itemsPerPage}`);
-      setFuncionarios(response.data.produtos);
+      setProdutos(response.data.produtos);
       setTotalPages(Math.ceil(response.data.total / itemsPerPage));
     } catch (error) {
       console.error('Erro ao buscar produtos:', error);
