@@ -73,7 +73,7 @@ const GestaoFuncionarios = () => {
     try {
       await axios.delete(`/api/funcionarios/${id}`);
       toast({
-        title: 'Serviço excluído com sucesso',
+        title: 'Funcionarios excluído com sucesso',
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -154,7 +154,7 @@ const GestaoFuncionarios = () => {
         </Thead>
         <Tbody>
           {funcionarios && funcionarios.map((funcionario) => (
-            <Tr key={funcionario.id}>
+            <Tr key={funcionario._id}>
               <Td>{funcionario.nome}</Td>
               <Td>{funcionario.email}</Td>
               <Td>{funcionario.telefone}</Td>
@@ -169,7 +169,7 @@ const GestaoFuncionarios = () => {
                 <IconButton
                   icon={<FiTrash2 />}
                   aria-label="Excluir"
-                  onClick={() => handleDeleteFuncionario(funcionario.id)}
+                  onClick={() => handleDeleteFuncionario(funcionario._id)}
                 />
               </Td>
             </Tr>
