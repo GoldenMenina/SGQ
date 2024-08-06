@@ -28,6 +28,7 @@ import {
 } from '@chakra-ui/react';
 import { FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
 import supabase  from '../lib/supabaseClient';
+import axios from 'axios'
 
 const GestaoClientes = () => {
   const [clientes, setClientes] = useState([]);
@@ -45,15 +46,9 @@ const GestaoClientes = () => {
 
   const fetchClientes = async () => {
     try {
-      const { data, error, count } = await supabase
-        .from('clientes')
-        .select('*', { count: 'exact' })
-        .range((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage - 1);
-
-      if (error) throw error;
-
-      setClientes(data);
-      setTotalPages(Math.ceil(count / itemsPerPage));
+      const response = await axios.get(`/api/clientes?page=${currentPage}&limit=${itemsPerPage}`);
+      setClientes(response.data.clientes);
+      setTotalPages(Math.ceil(response.data.total / itemsPerPage));
     } catch (error) {
       console.error('Erro ao buscar clientes:', error);
       toast({
@@ -78,9 +73,7 @@ const GestaoClientes = () => {
 
   const handleDeleteCliente = async (id) => {
     try {
-      const { error } = await supabase.from('clientes').delete().eq('id', id);
-      if (error) throw error;
-
+      await axios.delete(`/api/clientes/${id}`);
       toast({
         title: 'Cliente excluído com sucesso',
         status: 'success',
@@ -106,12 +99,7 @@ const GestaoClientes = () => {
 
     try {
       if (selectedCliente) {
-        const { error } = await supabase
-          .from('clientes')
-          .update(clienteData)
-          .eq('id', selectedCliente.id);
-        if (error) throw error;
-
+        await axios.put(`/api/clientes/${selectedCliente._id}`, clienteData);
         toast({
           title: 'Cliente atualizado com sucesso',
           status: 'success',
@@ -119,9 +107,7 @@ const GestaoClientes = () => {
           isClosable: true,
         });
       } else {
-        const { error } = await supabase.from('clientes').insert(clienteData);
-        if (error) throw error;
-
+        await axios.post('/api/clientes', clienteData);
         toast({
           title: 'Cliente adicionado com sucesso',
           status: 'success',
@@ -167,7 +153,7 @@ const GestaoClientes = () => {
         </Thead>
         <Tbody>
           {clientes.map((cliente) => (
-            <Tr key={cliente.id}>
+            <Tr key={cliente._id}>
               <Td>{cliente.nome}</Td>
               <Td>{cliente.nif}</Td>
               <Td>{cliente.email}</Td>
@@ -182,7 +168,7 @@ const GestaoClientes = () => {
                 <IconButton
                   icon={<FiTrash2 />}
                   aria-label="Excluir"
-                  onClick={() => handleDeleteCliente(cliente.id)}
+                  onClick={() => handleDeleteCliente(cliente._id)}
                 />
               </Td>
             </Tr>
@@ -278,3 +264,6 @@ const GestaoClientes = () => {
 };
 
 export default GestaoClientes;
+
+
+
