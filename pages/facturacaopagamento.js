@@ -147,8 +147,8 @@ const Facturacao = () => {
 
     // Update price if product or service is selected
     if (field === 'produto_id' && value) {
-      const selectedProduto = produtos.find(prod => prod.id === value);
-      const selectedServico = servicos.find(serv => serv.id === value);
+      const selectedProduto = produtos.find(prod => prod._id === value);
+      const selectedServico = servicos.find(serv => serv._id === value);
       newItens[index].preco = selectedProduto?.preco_venda || selectedServico?.preco || 0;
     }
 
@@ -487,12 +487,12 @@ const fetchCompanyDetails = async () => {
                       >
                         <option value="" disabled>Selecione um produto ou serviço</option>
                         {produtos.map(produto => (
-                          <option key={produto.id} value={produto.id}>
+                          <option key={produto._id} value={produto._id}>
                             {produto.nome} (Produto)
                           </option>
                         ))}
                         {servicos.map(servico => (
-                          <option key={servico.id} value={servico.id}>
+                          <option key={servico._id} value={servico._id}>
                             {servico.titulo} (Serviço)
                           </option>
                         ))}
