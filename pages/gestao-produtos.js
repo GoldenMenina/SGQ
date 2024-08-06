@@ -97,10 +97,16 @@ const itemsPerPage = 10;
     setLoading(true);
     const formData = new FormData(event.target);
     const produtoData = Object.fromEntries(formData.entries());
+  var produtoInfo = produtoData
+  produtoInfo.quantidade = Number(produtoInfo.quantidade)
+  
+  produtoInfo.preco_venda = Number(produtoInfo.preco_venda)
+  
+  produtoInfo.preco_custo = Number(produtoInfo.preco_custo)
   
     try {
       if (selectedProduto) {
-        await axios.put(`/api/produtos/${selectedProduto._id}`, produtoData);
+        await axios.put(`/api/produtos/${selectedProduto._id}`, produtoInfo);
         toast({
           title: 'Produto atualizado com sucesso',
           status: 'success',
