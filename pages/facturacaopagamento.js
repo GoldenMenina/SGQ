@@ -29,7 +29,7 @@ import { FiPlus, FiEdit, FiTrash2, FiPrinter } from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import supabase from '../lib/supabaseClient';
 
-import axios from 'axios'
+import axios from 
 
 const Facturacao = () => {
   const [facturas, setFacturas] = useState([]);
@@ -511,7 +511,7 @@ const fetchCompanyDetails = async () => {
                       <FormLabel>Preço</FormLabel>
                       <Input
                         type="number"
-                        value={item.preco}
+                        value={number(item.preco)}
                         onChange={(e) => handleItemChange(index, 'preco', parseFloat(e.target.value))}
                         readOnly
                       />
