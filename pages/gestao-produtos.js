@@ -27,7 +27,6 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
-import  supabase  from '../lib/supabaseClient';
 
 import axios from 'axios'
 
@@ -59,6 +58,11 @@ const itemsPerPage = 10;
         isClosable: true,
       });
     }
+  };
+  
+  const handleNovoProduto= () => {
+    setSelectedProduto(null);
+    onOpen();
   };
 
   const handleEditProduto = (produto) => {
@@ -101,7 +105,7 @@ const itemsPerPage = 10;
   
     try {
       if (selectedProduto) {
-        await axios.put(`/api/produtos/${selectedProduto._id}`, produtoInfo);
+        await axios.put(`/api/produtos/${selectedProduto._id}`, produtoData);
         toast({
           title: 'Produto atualizado com sucesso',
           status: 'success',
@@ -140,7 +144,7 @@ const itemsPerPage = 10;
         <Heading as="h1" size="xl">
           Gestão de Estoque
         </Heading>
-        <Button leftIcon={<FiPlus />} colorScheme="teal" onClick={handleNovoProduto}>
+        <Button leftIcon={<FiPlus />} colorScheme="teal" onClick={handleNovoProduto} >
           Novo Produto
         </Button>
       </Box>
