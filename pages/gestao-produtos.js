@@ -67,7 +67,13 @@ const itemsPerPage = 10;
   };
 
   const handleEditProduto = (produto) => {
-    setSelectedProduto(produto);
+    var produtoInfo = produto
+  produtoInfo.quantidade = Number(produtoInfo.quantidade)
+  
+  produtoInfo.preco_venda = Number(produtoInfo.preco_venda)
+  
+  produtoInfo.preco_custo = Number(produtoInfo.preco_custo)
+    setSelectedProduto(produtoInfo);
     onOpen();
   };
 
@@ -97,12 +103,7 @@ const itemsPerPage = 10;
     setLoading(true);
     const formData = new FormData(event.target);
     const produtoData = Object.fromEntries(formData.entries());
-  var produtoInfo = produtoData
-  produtoInfo.quantidade = Number(produtoInfo.quantidade)
   
-  produtoInfo.preco_venda = Number(produtoInfo.preco_venda)
-  
-  produtoInfo.preco_custo = Number(produtoInfo.preco_custo)
   
     try {
       if (selectedProduto) {
