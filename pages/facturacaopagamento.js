@@ -182,7 +182,7 @@ facturaData.total = calculateTotal();
     });
   }
 console.log(itens)
-consoke.log(facturaData.total)
+console.log(facturaData.total)
 return false 
   
   try {
