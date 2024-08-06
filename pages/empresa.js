@@ -33,13 +33,12 @@ const Empresa = () => {
 
   const fetchEmpresa = async () => {
     try {
-      const { data, error } = await supabase.from('empresa').select('*').single();
-      if (error) throw error;
-      setEmpresa(data);
+      const response = await axios.get(`/api/empresa`);
+      setEmpresa(response.data)
     } catch (error) {
-      console.error('Erro ao buscar informações da empresa:', error);
+      console.error('Erro ao buscar empresa:', error);
       toast({
-        title: 'Erro ao buscar informações da empresa',
+        title: 'Erro ao buscar empresa',
         description: error.message,
         status: 'error',
         duration: 3000,
