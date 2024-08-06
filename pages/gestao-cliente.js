@@ -31,7 +31,9 @@ import supabase  from '../lib/supabaseClient';
 import axios from 'axios'
 
 const GestaoClientes = () => {
-  const [clientes, setClientes] = useState([]);
+  
+  const [clientes, setClientes] = useState([])
+  const [loading, setLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedCliente, setSelectedCliente] = useState(null);
@@ -93,6 +95,7 @@ const GestaoClientes = () => {
   };
 
   const handleSubmit = async (event) => {
+    setLoading(true)
     event.preventDefault();
     const formData = new FormData(event.target);
     const clienteData = Object.fromEntries(formData.entries());
@@ -118,6 +121,7 @@ const GestaoClientes = () => {
 
       onClose();
       fetchClientes();
+      setLoading(false)
     } catch (error) {
       console.error(error);
       toast({
@@ -251,9 +255,15 @@ const GestaoClientes = () => {
               </FormControl>
             </ModalBody>
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} type="submit">
+            { loading ? (
+             <Button colorScheme="blue" mr={3} disabled>
+                            Aguarde
+                          </Button>
+            ): ( <Button colorScheme="blue" mr={3} type="submit">
                 Salvar
-              </Button>
+              </Button>)}
+             
+              
               <Button onClick={onClose}>Cancelar</Button>
             </ModalFooter>
           </form>

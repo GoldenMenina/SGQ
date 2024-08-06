@@ -32,6 +32,7 @@ import axios from 'axios';
 
 const GestaoServicos = () => {
   const [servicos, setServicos] = useState([]);
+    const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedServico, setSelectedServico] = useState(null);
@@ -95,6 +96,7 @@ const fetchServicos = async () => {
     };
   
     const handleSubmit = async (event) => {
+      setLoading(true)
       event.preventDefault();
       const formData = new FormData(event.target);
       const servicoData = Object.fromEntries(formData.entries());
@@ -120,6 +122,7 @@ const fetchServicos = async () => {
   
         onClose();
         fetchServicos();
+        setLoading(false)
       } catch (error) {
         console.error(error);
         toast({
@@ -223,9 +226,14 @@ const fetchServicos = async () => {
               </FormControl>
             </ModalBody>
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} type="submit">
+                 { loading ? (
+             <Button colorScheme="blue" mr={3} disabled>
+                            Aguarde
+                          </Button>
+            ): ( <Button colorScheme="blue" mr={3} type="submit">
                 Salvar
-              </Button>
+              </Button>)}
+         
               <Button onClick={onClose}>Cancelar</Button>
             </ModalFooter>
           </form>
