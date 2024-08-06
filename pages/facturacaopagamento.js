@@ -41,6 +41,7 @@ const Facturacao = () => {
   const [itens, setItens] = useState([{ produto_id: '', quantidade: 1, preco: 0 }]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
+  var newItems = []
 
   useEffect(() => {
     fetchAll();
@@ -157,6 +158,8 @@ const Facturacao = () => {
 
   const addItem = () => {
     setItens([...itens, { produto_id: '', quantidade: 1, preco: 0 }]);
+    
+  
   };
 
   const calculateTotal = () => {
@@ -178,7 +181,7 @@ facturaData.total = calculateTotal();
       isClosable: true,
     });
   }
-console.log(facturaData)
+console.log(itens)
 return false 
   
   try {
@@ -278,16 +281,6 @@ return false
       duration: 3000,
       isClosable: true,
     });
-  }
-};
-const fetchCompanyDetails = async () => {
-  try {
-    const { data, error } = await supabase.from('empresa').select('*').single();
-    if (error) throw error;
-    setEmpresa(data)
-  } catch (error) {
-    console.error('Erro ao buscar informações da empresa:', error);
-    return null;
   }
 };
 
