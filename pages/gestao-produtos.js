@@ -173,7 +173,7 @@ const itemsPerPage = 10;
                 <IconButton
                   icon={<FiTrash2 />}
                   aria-label="Excluir"
-                  onClick={() => handleDeleteProduto(produto.id)}
+                  onClick={() => handleDeleteProduto(produto._id)}
                 />
               </Td>
             </Tr>
