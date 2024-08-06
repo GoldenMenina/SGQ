@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   const db = client.db('sgq');
   const collection = db.collection('servicos');
   const { id } = req.query;
-console.log(req.params) 
+console.log(req.query) 
 return false
   if (req.method === 'PUT') {
     const updatedServico = req.body;
