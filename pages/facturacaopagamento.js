@@ -511,7 +511,7 @@ const fetchCompanyDetails = async () => {
                       <FormLabel>Preço</FormLabel>
                       <Input
                         type="number"
-                        value={number(item.preco)}
+                        value={item.preco}
                         onChange={(e) => handleItemChange(index, 'preco', parseFloat(e.target.value))}
                         readOnly
                       />
