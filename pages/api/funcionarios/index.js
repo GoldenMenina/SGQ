@@ -10,13 +10,13 @@ export default async function handler(req, res) {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const clientes = await collection.find().skip(skip).limit(limit).toArray();
+    const funcionarios = await collection.find().skip(skip).limit(limit).toArray();
     const total = await collection.countDocuments();
 
-    res.status(200).json({ clientes, total });
+    res.status(200).json({ funcionarios, total });
   } else if (req.method === 'POST') {
-    const newCliente = req.body;
-    const result = await collection.insertOne(newCliente);
+    const newFuncionario = req.body;
+    const result = await collection.insertOne(newFuncionario);
     res.status(201).json();
   } else {
     res.setHeader('Allow', ['GET', 'POST']);
