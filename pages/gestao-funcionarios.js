@@ -27,7 +27,6 @@ import {
 } from '@chakra-ui/react';
 import { FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
 import axios from 'axios';
-import { supabase } from './supabaseClient';  // Add this line to import supabase
 
 const GestaoFuncionarios = () => {
   const [funcionarios, setFuncionarios] = useState([]);
