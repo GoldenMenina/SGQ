@@ -14,6 +14,7 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@supabase/supabase-js": "^2.44.3",
     "axios": "^1.7.3",
+    "bson": "^6.8.0",
     "framer-motion": "^11.3.19",
     "jspdf": "^2.5.1",
     "mongodb": "^6.8.0",
