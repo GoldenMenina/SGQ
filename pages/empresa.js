@@ -94,6 +94,7 @@ const Empresa = () => {
     
     var empresainfo = empresa
     empresainfo.foto_url = foto_url
+    console.log(empresainfo)
 
     try {
        const response = await axios.put(`/api/empresa`,empresainfo);

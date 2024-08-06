@@ -18,5 +18,6 @@ const objectId = new ObjectId('66b272905a6d3d8b3bb84412')
       { $set: req.body },
       { returnOriginal: false }
     );
+    res.status(200).json(result.value);
   }
 }
