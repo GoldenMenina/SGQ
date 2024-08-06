@@ -94,6 +94,7 @@ const Empresa = () => {
     
     var empresainfo = empresa
     empresainfo.foto_url = foto_url
+    delete empresainfo._id
     console.log(empresainfo)
 
     try {
