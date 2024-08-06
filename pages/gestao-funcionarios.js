@@ -81,7 +81,7 @@ const GestaoFuncionarios = () => {
       fetchFuncionarios();
     } catch (error) {
       toast({
-        title: 'Erro ao excluir serviço',
+        title: 'Erro ao excluir funcionario',
         description: error.message,
         status: 'error',
         duration: 3000,

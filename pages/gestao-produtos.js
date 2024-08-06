@@ -34,20 +34,19 @@ const GestaoEstoque = () => {
   const [selectedProduto, setSelectedProduto] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
-
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+const itemsPerPage = 10;
   useEffect(() => {
     fetchProdutos();
-  }, []);
+  }, [currentPage]);
 
   const fetchProdutos = async () => {
     try {
-      const { data, error } = await supabase
-        .from('produtos')
-        .select('*')
-        .order('nome');
-
-      if (error) throw error;
-      setProdutos(data);
+      const response = await axios.get(`/api/produtos?page=${currentPage}&limit=${itemsPerPage}`);
+      setFuncionarios(response.data.produtos);
+      setTotalPages(Math.ceil(response.data.total / itemsPerPage));
     } catch (error) {
       console.error('Erro ao buscar produtos:', error);
       toast({
@@ -72,19 +71,17 @@ const GestaoEstoque = () => {
 
   const handleDeleteProduto = async (id) => {
     try {
-      const { error } = await supabase.from('produtos').delete().eq('id', id);
-      if (error) throw error;
-
+      await axios.delete(`/api/produtos/${id}`);
       toast({
-        title: 'Produto excluído com sucesso',
+        title: 'Produtos excluído com sucesso',
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
-      fetchProdutos();
+      fetchFuncionarios();
     } catch (error) {
       toast({
-        title: 'Erro ao excluir produto',
+        title: 'Erro ao excluir Produto',
         description: error.message,
         status: 'error',
         duration: 3000,
@@ -95,17 +92,13 @@ const GestaoEstoque = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setLoading(true);
     const formData = new FormData(event.target);
     const produtoData = Object.fromEntries(formData.entries());
-
+  
     try {
       if (selectedProduto) {
-        const { error } = await supabase
-          .from('produtos')
-          .update(produtoData)
-          .eq('id', selectedProduto.id);
-        if (error) throw error;
-
+        await axios.put(`/api/produtos/${selectedProduto._id}`, produtoData);
         toast({
           title: 'Produto atualizado com sucesso',
           status: 'success',
@@ -113,19 +106,17 @@ const GestaoEstoque = () => {
           isClosable: true,
         });
       } else {
-        const { error } = await supabase.from('produtos').insert(produtoData);
-        if (error) throw error;
-
+        await axios.post('/api/produtos', produtoData);
         toast({
-          title: 'Produto adicionado com sucesso',
+          title: 'Produtos adicionado com sucesso',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
       }
-
+  
       onClose();
-      fetchProdutos();
+      fetchFuncionarios();
     } catch (error) {
       console.error(error);
       toast({
@@ -135,6 +126,8 @@ const GestaoEstoque = () => {
         duration: 3000,
         isClosable: true,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -166,8 +159,8 @@ const GestaoEstoque = () => {
               <Td>{produto.nome}</Td>
               <Td>{produto.sku}</Td>
               <Td>{produto.quantidade}</Td>
-              <Td>R$ {produto.preco_custo}</Td>
-              <Td>R$ {produto.preco_venda}</Td>
+              <Td>AOA {produto.preco_custo}</Td>
+              <Td>AOA {produto.preco_venda}</Td>
               <Td>
                 <IconButton
                   icon={<FiEdit />}
