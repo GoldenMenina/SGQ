@@ -80,7 +80,7 @@ const itemsPerPage = 10;
         duration: 3000,
         isClosable: true,
       });
-      fetchFuncionarios();
+      fetchProdutos();
     } catch (error) {
       toast({
         title: 'Erro ao excluir Produto',
@@ -118,7 +118,7 @@ const itemsPerPage = 10;
       }
   
       onClose();
-      fetchFuncionarios();
+      fetchProdutos();
     } catch (error) {
       console.error(error);
       toast({
@@ -216,9 +216,15 @@ const itemsPerPage = 10;
               </FormControl>
             </ModalBody>
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} type="submit">
-                Salvar
-              </Button>
+               {loading ? (
+                <Button colorScheme="blue" mr={3} disabled>
+                  Aguarde
+                </Button>
+              ) : (
+                <Button colorScheme="blue" mr={3} type="submit">
+                  Salvar
+                </Button>
+              )}
               <Button onClick={onClose}>Cancelar</Button>
             </ModalFooter>
           </form>
