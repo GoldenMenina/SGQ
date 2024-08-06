@@ -157,7 +157,7 @@ const fetchServicos = async () => {
           </Tr>
         </Thead>
         <Tbody>
-          {servicos.map((servico) => (
+          {servicos && servicos.map((servico) => (
             <Tr key={servico.id}>
               <Td>{servico.titulo}</Td>
               <Td>{servico.descricao}</Td>

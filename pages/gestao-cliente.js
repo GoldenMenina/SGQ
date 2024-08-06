@@ -156,7 +156,7 @@ const GestaoClientes = () => {
           </Tr>
         </Thead>
         <Tbody>
-          {clientes.map((cliente) => (
+          {clientes && clientes.map((cliente) => (
             <Tr key={cliente._id}>
               <Td>{cliente.nome}</Td>
               <Td>{cliente.nif}</Td>
