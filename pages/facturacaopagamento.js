@@ -41,12 +41,28 @@ const Facturacao = () => {
   const toast = useToast();
 
   useEffect(() => {
-    fetchFacturas();
-    fetchClientes();
-    fetchProdutos();
-    fetchServicos();
-    fetchCompanyDetails();
+    fetchAll();
   }, []);
+  
+  const fetchAll = async () => {
+    try {
+      const response = await axios.get(`/api/facturacao/all`);
+      setClientes(response.data.clientes)
+      setProdutos(response.data.produtos)
+      setServicos(response.data.servicos)
+      setEmpresa(response.data.empresa)
+    } catch (error) {
+      console.error('Erro ao buscar informações:', error);
+      toast({
+        title: 'Erro ao buscar informações',
+        description: error.message,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
 
   const fetchFacturas = async () => {
     try {
@@ -65,56 +81,6 @@ const Facturacao = () => {
     }
   };
 
-  const fetchClientes = async () => {
-    try {
-      const { data, error } = await supabase.from('clientes').select('*').order('nome');
-      if (error) throw error;
-      setClientes(data);
-    } catch (error) {
-      console.error('Erro ao buscar clientes:', error);
-      toast({
-        title: 'Erro ao buscar clientes',
-        description: error.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-
-  const fetchProdutos = async () => {
-    try {
-      const { data, error } = await supabase.from('produtos').select('*').order('nome');
-      if (error) throw error;
-      setProdutos(data);
-    } catch (error) {
-      console.error('Erro ao buscar produtos:', error);
-      toast({
-        title: 'Erro ao buscar produtos',
-        description: error.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-
-  const fetchServicos = async () => {
-    try {
-      const { data, error } = await supabase.from('serviços').select('*').order('titulo');
-      if (error) throw error;
-      setServicos(data);
-    } catch (error) {
-      console.error('Erro ao buscar serviços:', error);
-      toast({
-        title: 'Erro ao buscar serviços',
-        description: error.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
 
   const fetchFacturaItens = async (facturaId) => {
     try {
@@ -210,22 +176,9 @@ facturaData.total = calculateTotal();
       isClosable: true,
     });
   }
-
-  // Assuming calculateTotal is a function that returns the total value
+console.log(facturaData)
+return false 
   
-
-  // Optional: Check for valid status
-  const validStatuses = ['proforma', 'invoice', 'paid'];
-  if (!validStatuses.includes(facturaData.status)) {
-    return toast({
-      title: 'Status inválido',
-      description: `O status deve ser um dos seguintes: ${validStatuses.join(', ')}`,
-      status: 'error',
-      duration: 3000,
-      isClosable: true,
-    });
-  }
-
   try {
     let facturaId;
     if (selectedFactura) {
