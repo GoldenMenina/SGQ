@@ -67,12 +67,13 @@ const itemsPerPage = 10;
   };
 
   const handleEditProduto = (produto) => {
-    setSelectedProduto({
-      ...produto,
-      quantidade: Number(produto.quantidade),
-      preco_venda: Number(produto.preco_venda),
-      preco_custo: Number(produto.preco_custo)
-    });
+    var produtoInfo = produto
+  produtoInfo.quantidade = Number(produtoInfo.quantidade)
+  
+  produtoInfo.preco_venda = Number(produtoInfo.preco_venda)
+  
+  produtoInfo.preco_custo = Number(produtoInfo.preco_custo)
+    setSelectedProduto(produtoInfo);
     onOpen();
   };
 
@@ -205,32 +206,21 @@ const itemsPerPage = 10;
               <FormControl mt={4}>
                 <FormLabel>Quantidade</FormLabel>
                 <NumberInput min={0}>
-                  <NumberInputField 
-                    name="quantidade" 
-                    value={selectedProduto ? selectedProduto.quantidade : ''}
-                    onChange={(e) => setSelectedProduto({...selectedProduto, quantidade: e.target.value})}
-                    required 
-                  />
+                  <NumberInputField name="quantidade" defaultValue={selectedProduto?selectedProduto.quantidade:undefined} required />
                 </NumberInput>
-              </FormControl> <
-              FormControl mt = { 4 } >
-                <FormLabel>Preço de Custo</FormLabel> <
-                NumberInput min = { 0 } precision = { 2 } >
-                <NumberInputField 
-                    name="preco_custo" 
-                    value={selectedProduto ? selectedProduto.preco_custo : ''}
-                    onChange={(e) => setSelectedProduto({...selectedProduto, preco_custo: e.target.value})}
-                    required 
-                  /> </NumberInput> </FormControl> <FormControl mt = { 4 } >
-                <FormLabel>Preço de Venda</FormLabel> <
-                NumberInput min = { 0 } precision = { 2 } >
-                <NumberInputField 
-                    name="preco_venda" 
-                    value={selectedProduto ? selectedProduto.preco_venda : ''}
-                    onChange={(e) => setSelectedProduto({...selectedProduto, preco_venda: e.target.value})}
-                    required 
-                  /> </NumberInput>
-                </FormControl>
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Preço de Custo</FormLabel>
+                <NumberInput min={0} precision={2}>
+                  <NumberInputField name="preco_custo" defaultValue={selectedProduto?selectedProduto.preco_custo:undefined} required />
+                </NumberInput>
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Preço de Venda</FormLabel>
+                <NumberInput min={0} precision={2}>
+                  <NumberInputField name="preco_venda" defaultValue={selectedProduto?selectedProduto.preco_venda:undefined} required />
+                </NumberInput>
+              </FormControl>
             </ModalBody>
             <ModalFooter>
                {loading ? (
