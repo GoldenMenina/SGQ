@@ -167,6 +167,7 @@ return (
                       <Button
                         key={link.href}
                         as="a"
+                        onClick={onclose}
                         href="#"
                         variant="ghost"
                         justifyContent="flex-start"
