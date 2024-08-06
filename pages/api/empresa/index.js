@@ -12,5 +12,11 @@ const objectId = new ObjectId('66b272905a6d3d8b3bb84412')
   if (req.method === 'GET') {
     const empresa = await collection.findOne({_id:objectId});
     res.status(200).json(empresa);
+  }else if(req.method === 'PUT'){
+      const result = await collection.findOneAndUpdate(
+      { _id: objectId },
+      { $set: req.body },
+      { returnOriginal: false }
+    );
   }
 }

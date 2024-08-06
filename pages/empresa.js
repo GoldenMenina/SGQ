@@ -91,13 +91,12 @@ const Empresa = () => {
       foto_url = await uploadImage(file);
       if (!foto_url) return;
     }
+    
+    var empresainfo = empresa
+    empresainfo.foto_url = foto_url
 
     try {
-      const { data, error } = await supabase
-        .from('empresa')
-        .upsert({ ...empresa, foto_url })
-        .eq('id', empresa.id || 1);
-      if (error) throw error;
+       const response = await axios.put(`/api/empresa`,empresainfo);
 
       toast({
         title: 'Informações da empresa salvas com sucesso',
