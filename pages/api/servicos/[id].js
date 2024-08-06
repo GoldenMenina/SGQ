@@ -6,7 +6,8 @@ export default async function handler(req, res) {
   const db = client.db('sgq');
   const collection = db.collection('servicos');
   const { id } = req.query;
-console.log(id)
+console.log(id) 
+return false
   if (req.method === 'PUT') {
     const updatedServico = req.body;
     const result = await collection.findOneAndUpdate(
