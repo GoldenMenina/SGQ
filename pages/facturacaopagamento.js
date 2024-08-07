@@ -384,7 +384,7 @@ const itemTotal = item.quantidade * parseFloat(item.preco);
             <ModalBody>
               <FormControl mb={4}>
                 <FormLabel>Cliente</FormLabel>
-                <Select name="cliente_id" defaultValue={selectedFactura?.cliente_id || ''} required ><option value="" disabled>Selecione um cliente</option>
+                <Select name="cliente_id" defaultValue={selectedFactura?.nome || ''} required ><option value="" disabled>Selecione um cliente</option>
                   {clientes.map(cliente => (
                     <option onClick={()=>{console.log(cliente)}} key={cliente._id} value={cliente._id}>
                       {cliente.nome}
