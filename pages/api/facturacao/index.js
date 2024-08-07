@@ -23,13 +23,10 @@ export default async function handler(req, res) {
     if (startDate || endDate) {
       query.data = {};
       if (startDate) {
-        query.data.$gte = new Date(startDate);
+        query.data.$gte = startDate;
       }
       if (endDate) {
-        // Add one day to include the end date in the results
-        const endDateObj = new Date(endDate);
-        endDateObj.setDate(endDateObj.getDate() + 1);
-        query.data.$lt = endDateObj;
+        query.data.$lte = endDate;
       }
     }
 
