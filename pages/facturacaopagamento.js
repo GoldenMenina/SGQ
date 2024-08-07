@@ -231,12 +231,12 @@ facturaData.total = calculateTotal();
   // Add title
   doc.setFontSize(24);
   doc.setTextColor(primaryColor);
-  doc.text("FATURA PROFORMA", 200, 20, { align: 'right' });
+  doc.text(`${factura.status == 'proforma' ? 'FACTURA PROFORMA':( factura.status == 'paid'?'FACTURA PAGO':'FACTURA')}`, 200, 20, { align: 'right' });
 
   // Add invoice details
   doc.setFontSize(10);
   doc.setTextColor(secondaryColor);
-  doc.text(`Fatura Nº: FAT-${factura._id.toString().padStart(4, '0')}`, 200, 30, { align: 'right' });
+  doc.text(`Factura Nº: FAT-${factura._id.toString().padStart(4, '0')}`, 200, 30, { align: 'right' });
   doc.text(`Data: ${new Date().toLocaleDateString('pt-PT')}`, 200, 35, { align: 'right' });
   doc.text(`Data de Vencimento: ${new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString('pt-PT')}`, 200, 40, { align: 'right' });
 
@@ -251,7 +251,7 @@ facturaData.total = calculateTotal();
   // Add client info
   if (cliente) {
     doc.setFontSize(12);
-    doc.text("Faturar para:", 10, 80);
+    doc.text("Factura para:", 10, 80);
     doc.setFontSize(10);
     doc.text(cliente.nome, 10, 85);
     doc.text(cliente.email, 10, 90);
@@ -311,7 +311,7 @@ const itemTotal = item.quantidade * parseFloat(item.preco);
   doc.text("Obrigado pela sua preferência!", 105, 280, { align: 'center' });
 
   // Save the PDF
-  doc.save(`Fatura_Proforma_${factura._id}.pdf`);
+  doc.save(`Factura_Proforma_${factura._id}.pdf`);
 };
   return (
     <Container maxW="container.xl" py={4}>
@@ -396,7 +396,7 @@ const itemTotal = item.quantidade * parseFloat(item.preco);
                 <FormLabel>Status</FormLabel>
                 <Select name="status" defaultValue={selectedFactura?.status || ''}>
                   <option value="proforma">Proforma</option>
-                  <option value="invoice">Invoice</option>
+                  <option value="invoice">Factura</option>
                   <option value="paid">Pago</option>
                 </Select>
               </FormControl>
