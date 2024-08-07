@@ -145,10 +145,10 @@ export async function getServerSideProps() {
 
   return {
     props: {
-      invoiceData,
-      serviceData,
-      productData,
-      monthlyRevenue
+      invoiceData: JSON.parse(JSON.stringify(invoiceData)),
+      serviceData: JSON.parse(JSON.stringify(serviceData)),
+      productData: JSON.parse(JSON.stringify(productData)),
+      monthlyRevenue: JSON.parse(JSON.stringify(monthlyRevenue)),
     },
   };
 }
