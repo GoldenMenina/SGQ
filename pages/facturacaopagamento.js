@@ -178,17 +178,7 @@ facturaData.total = calculateTotal();
   try {
     let facturaId;
     if (selectedFactura) {
-      // Update existing factura
-      const { data, error } = await supabase
-        .from('facturas')
-        .update(facturaData)
-        .eq('id', selectedfactura._id)
-        .select();
-      if (error) throw error;
-      if (!data || data.length === 0) {
-        throw new Error('Factura was updated but no data was returned');
-      }
-      facturaId = selectedfactura._id;
+      await axios.put(`/api/clientes/${selectedFactura._id}`, facturaData);
     } else {
       
   const cliente = clientes.find((c) => c._id === facturaData.cliente_id);
