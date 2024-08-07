@@ -178,7 +178,7 @@ facturaData.total = calculateTotal();
   try {
     let facturaId;
     if (selectedFactura) {
-      await axios.put(`/api/clientes/${selectedFactura._id}`, facturaData);
+      await axios.put(`/api/facturacao/${selectedFactura._id}`, facturaData);
     } else {
       
   const cliente = clientes.find((c) => c._id === facturaData.cliente_id);
