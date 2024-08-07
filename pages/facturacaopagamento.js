@@ -59,7 +59,7 @@ const Facturacao = () => {
   const [endDate, setEndDate] = useState('');
   
   useEffect(() => {
-    fetchClientes();
+    fetchFacturas();
   }, [currentPage, searchTerm, startDate, endDate]);
   
   const fetchAll = async () => {
