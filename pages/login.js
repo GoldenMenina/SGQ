@@ -8,6 +8,7 @@ import { useEffect } from 'react'
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState('');
   
   const [session, setSession] = useState(null);
   const toast = useToast();
