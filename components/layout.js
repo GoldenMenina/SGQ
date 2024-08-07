@@ -56,49 +56,37 @@ const Layout = ({ children }) => {
   const toast = useToast()
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setSession(session)
-      setLoading(false)
-
-      if (!session && router.pathname !== '/login') {
-        router.push('/login')
+    const checkSession = () => {
+      const storedSession = localStorage.getItem('session');
+      if (storedSession) {
+        setSession(JSON.parse(storedSession));
       }
-      if (session && router.pathname === '/login') {
-        router.push('/')
+      setLoading(false);
+
+      if (!storedSession && router.pathname !== '/login') {
+        router.push('/login');
       }
-    }
+    };
 
-    checkSession()
+    checkSession();
+  }, [router]);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setSession(session)
-      if (!session && router.pathname !== '/login') {
-        router.push('/login')
-      } else if (session && router.pathname === '/login') {
-        router.push('/')
-      }
-    })
-
-    return () => {
-      subscription?.unsubscribe()
-    }
-  }, [router])
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) {
+    try {;
+      localStorage.removeItem('session');
+      setSession(null);
+      router.push('/login');
+    } catch (error) {
       toast({
         title: 'Erro',
-        description: error.message,
+        description: 'Failed to logout',
         status: 'error',
         duration: 5000,
         isClosable: true,
-      })
-    } else {
-      router.push('/login')
+      });
     }
-  }
+  };
 
   if (loading) {
     return <Box>Carregando...</Box>
@@ -203,3 +191,5 @@ return (
 }
 
 export default Layout
+
+
