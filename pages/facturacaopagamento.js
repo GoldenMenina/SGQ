@@ -40,12 +40,20 @@ const Facturacao = () => {
   const [selectedFactura, setSelectedFactura] = useState(null);
   const [itens, setItens] = useState([{ produto_id: '', quantidade: 1, preco: 0 }]);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 10;
   const toast = useToast();
   var newItems = []
 
   useEffect(() => {
     fetchAll();
   }, []);
+  
+  useEffect(() => {
+    fetchFacturas();
+  }, [currentPage]);
   
   const fetchAll = async () => {
     try {
@@ -69,9 +77,9 @@ const Facturacao = () => {
 
   const fetchFacturas = async () => {
     try {
-      const { data, error } = await supabase.from('facturas').select('*').order('data', { ascending: false });
-      if (error) throw error;
-      setFacturas(data);
+          const response = await axios.get(`/api/facturacao?page=${currentPage}&limit=${itemsPerPage}`);
+      setFacturas(response.data.facturas);
+      setTotalPages(Math.ceil(response.data.total / itemsPerPage));
     } catch (error) {
       console.error('Erro ao buscar facturas:', error);
       toast({
@@ -85,22 +93,6 @@ const Facturacao = () => {
   };
 
 
-  const fetchFacturaItens = async (facturaId) => {
-    try {
-      const { data, error } = await supabase.from('factura_itens').select('*').eq('factura_id', facturaId);
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Erro ao buscar itens da factura:', error);
-      toast({
-        title: 'Erro ao buscar itens da factura',
-        description: error.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
 
   const handleNovoFactura = () => {
     setSelectedFactura(null);
@@ -109,7 +101,7 @@ const Facturacao = () => {
   };
 
   const handleEditFactura = async (factura) => {
-    const facturaItens = await fetchFacturaItens(factura.id);
+    const facturaItens = await fetchFacturaItens(factura._id);
     setSelectedFactura(factura);
     setItens(facturaItens.map(item => ({
       produto_id: item.produto_id || item.servico_id,
@@ -181,9 +173,6 @@ facturaData.total = calculateTotal();
       isClosable: true,
     });
   }
-console.log(itens)
-console.log(facturaData.total)
-return false 
   
   try {
     let facturaId;
@@ -192,77 +181,19 @@ return false
       const { data, error } = await supabase
         .from('facturas')
         .update(facturaData)
-        .eq('id', selectedFactura.id)
+        .eq('id', selectedfactura._id)
         .select();
       if (error) throw error;
       if (!data || data.length === 0) {
         throw new Error('Factura was updated but no data was returned');
       }
-      facturaId = selectedFactura.id;
+      facturaId = selectedfactura._id;
     } else {
-      // Insert new factura
-      const { data, error } = await supabase
-        .from('facturas')
-        .insert(facturaData)
-        .select();
-      if (error) throw error;
-      if (!data || data.length === 0) {
-        throw new Error('Factura was inserted but no data was returned');
-      }
-      facturaId = data[0].id;
+      var facturaInfo = facturaData
+      facturaInfo.itens = itens
+      await axios.post('/api/facturacao', facturaInfo);
     }
 
-    console.log('Factura ID:', facturaId);
-    console.log('Items to insert/update:', itens);
-
-    // Handle factura_itens
-    for (const item of itens) {
-      const itemData = { ...item, factura_id: facturaId };
-
-      // Ensure quantity and price are valid
-      if (itemData.quantidade <= 0) {
-        return toast({
-          title: 'Quantidade inválida',
-          description: 'A quantidade deve ser maior que zero.',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-      if (itemData.preco < 0) {
-        return toast({
-          title: 'Preço inválido',
-          description: 'O preço deve ser um valor não negativo.',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-
-      // Check for existing item with the same factura_id and produto_id/servico_id
-      const existingItem = await supabase
-        .from('factura_itens')
-        .select('*')
-        .eq('factura_id', facturaId)
-        .eq('produto_id', itemData.produto_id)
-        .single();
-
-      if (existingItem) {
-        // Update existing item
-        const { error } = await supabase
-          .from('factura_itens')
-          .update(itemData)
-          .eq('factura_id', existingItem.factura_id)
-          .eq('produto_id', existingItem.produto_id);
-        if (error) throw error;
-      } else {
-        // Insert new item
-        const { error } = await supabase
-          .from('factura_itens')
-          .insert(itemData);
-        if (error) throw error;
-      }
-    }
 
     toast({
       title: `Factura ${selectedFactura ? 'atualizada' : 'adicionada'} com sucesso`,
@@ -292,9 +223,7 @@ return false
     format: 'a4'
   });
 
-  const itens = await fetchFacturaItens(factura.id);
-  const cliente = clientes.find((c) => c.id === factura.cliente_id);
-
+  const itens = factura.itens
   // Set colors
   const primaryColor = '#3498db';
   const secondaryColor = '#2c3e50';
@@ -310,7 +239,7 @@ return false
   // Add invoice details
   doc.setFontSize(10);
   doc.setTextColor(secondaryColor);
-  doc.text(`Fatura Nº: FAT-${factura.id.toString().padStart(4, '0')}`, 200, 30, { align: 'right' });
+  doc.text(`Fatura Nº: FAT-${factura._id.toString().padStart(4, '0')}`, 200, 30, { align: 'right' });
   doc.text(`Data: ${new Date().toLocaleDateString('pt-PT')}`, 200, 35, { align: 'right' });
   doc.text(`Data de Vencimento: ${new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString('pt-PT')}`, 200, 40, { align: 'right' });
 
@@ -388,7 +317,7 @@ return false
   doc.text("Obrigado pela sua preferência!", 105, 280, { align: 'center' });
 
   // Save the PDF
-  doc.save(`Fatura_Proforma_${factura.id}.pdf`);
+  doc.save(`Fatura_Proforma_${factura._id}.pdf`);
 };
   return (
     <Container maxW="container.xl" py={4}>
@@ -409,8 +338,8 @@ return false
           </Thead>
           <Tbody>
             {facturas.map(factura => (
-              <Tr key={factura.id}>
-                <Td>{factura.id}</Td>
+              <Tr key={factura._id}>
+                <Td>{factura._id}</Td>
                 <Td>{clientes.find(cliente => cliente.id === factura.cliente_id)?.nome}</Td>
                 <Td>{new Date(factura.data).toLocaleDateString()}</Td>
                 <Td>{factura.total}</Td>
@@ -423,7 +352,7 @@ return false
                   <IconButton
                     icon={<FiTrash2 />}
                     colorScheme="red"
-                    onClick={() => handleDeleteFactura(factura.id)}
+                    onClick={() => handleDeleteFactura(factura._id)}
                     mr={2}
                   />
                   <IconButton
@@ -436,6 +365,21 @@ return false
             ))}
           </Tbody>
         </Table>
+        
+      <Box mt={4} display="flex" justifyContent="space-between">
+        <Button
+          onClick={() => setCurrentPage(currentPage - 1)}
+          isDisabled={currentPage === 1}
+        >
+          Anterior
+        </Button>
+        <Button
+          onClick={() => setCurrentPage(currentPage + 1)}
+          isDisabled={currentPage === totalPages}
+        >
+          Próxima
+        </Button>
+      </Box>
       </Box>
 
       <Modal isOpen={isOpen} onClose={onClose}>
