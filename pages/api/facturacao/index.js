@@ -1,6 +1,6 @@
 import clientPromise from '../../../lib/mongodb';
-
 import { ObjectId } from 'mongodb';
+
 export default async function handler(req, res) {
   const client = await clientPromise;
   const db = client.db('sgq');
@@ -10,31 +10,40 @@ export default async function handler(req, res) {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-const{ search = '' ,startDate = '', endDate = ''} = req.query;
-let query = {};
+    const { search = '', startDate = '', endDate = '' } = req.query;
 
-if (search) {
-  query.nome = { $regex: search, $options: 'i' };
-}
+    let query = {};
 
-if (startDate || endDate) {
-  query.data = {};
-  if (startDate) {
-    query.data.$gte = new Date(startDate);
-  }
-  if (endDate) {
-    query.data.$lte = new Date(endDate);
-  }
-}
+    if (search) {
+      query.$or = [
+        { nome: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    if (startDate || endDate) {
+      query.data = {};
+      if (startDate) {
+        query.data.$gte = new Date(startDate);
+      }
+      if (endDate) {
+        // Add one day to include the end date in the results
+        const endDateObj = new Date(endDate);
+        endDateObj.setDate(endDateObj.getDate() + 1);
+        query.data.$lt = endDateObj;
+      }
+    }
+
+    console.log('Query:', JSON.stringify(query, null, 2)); // For debugging
+
     const facturas = await collection.find(query).skip(skip).limit(limit).toArray();
-    const total = await collection.countDocuments();
+    const total = await collection.countDocuments(query);
 
     res.status(200).json({ facturas, total });
   } else if (req.method === 'POST') {
     const newFactura = req.body;
     const result = await collection.insertOne(newFactura);
-    res.status(201).json();
-  }else {
+    res.status(201).json(result);
+  } else {
     res.setHeader('Allow', ['GET', 'POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
