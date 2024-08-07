@@ -47,7 +47,7 @@ const GestaoServicos = () => {
 
   useEffect(() => {
     fetchServicos();
-  }, [currentPage]);
+  }, [currentPage,searchTerm]);
 
 
 const fetchServicos = async () => {
