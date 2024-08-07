@@ -140,12 +140,11 @@ return (
               />
             </HStack>
           </Flex>
-          
 
           <Flex flex="1" mt="60px">
             <Drawer isOpen={isOpen} onClose={onClose} placement="left">
               <DrawerOverlay zIndex={2000} />
-              <DrawerContent zIndex={2000}>
+              <DrawerContent>
                 <DrawerCloseButton />
                 <DrawerHeader>Menu</DrawerHeader>
                 <DrawerBody>
