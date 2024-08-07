@@ -223,7 +223,6 @@ facturaData.total = calculateTotal();
 
   const generatePDF = async (factura) => {
     
-    console.log(factura.itens)
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -284,11 +283,11 @@ facturaData.total = calculateTotal();
   yOffset += 15;
   doc.setTextColor(secondaryColor);
   itens.forEach((item, index) => {
-
+const itemTotal = item.quantidade * parseFloat(item.preco);
 
     doc.text(item.nome, 15, yOffset);
     doc.text(item.quantidade.toString(), 105, yOffset);
-    doc.text(`${item.preco.toFixed(2)} Kz`, 135, yOffset);
+    doc.text(`${parseFloat(item.preco).toFixed(2)} Kz`, 135, yOffset);
     doc.text(`${itemTotal.toFixed(2)} Kz`, 175, yOffset);
 
     yOffset += 10;
@@ -346,7 +345,7 @@ facturaData.total = calculateTotal();
             {facturas.map(factura => (
               <Tr key={factura._id}>
                 <Td>{factura._id}</Td>
-                <Td>{factura.cliente_id}</Td>
+                <Td>{factura.nome}</Td>
                 <Td>{new Date(factura.data).toLocaleDateString()}</Td>
                 <Td>{factura.total}</Td>
                 <Td>
