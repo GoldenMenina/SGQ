@@ -112,7 +112,7 @@ export async function getServerSideProps() {
   const startOfYear = new Date(currentYear, 0, 1);
   const endOfYear = new Date(currentYear, 11, 31);
 
-  const invoices = await db.collection('factura').find({
+  const invoices = await db.collection('facturas').find({
     data: {
       $gte: startOfYear,
       $lte: endOfYear
@@ -133,7 +133,7 @@ export async function getServerSideProps() {
   });
 
   
-  const invoiceData = await db.collection('factura').aggregate([
+  const invoiceData = await db.collection('facturas').aggregate([
     { $group: { _id: '$status', total: { $sum: '$total' } } }
   ]).toArray();
 
