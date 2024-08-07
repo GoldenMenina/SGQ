@@ -16,7 +16,7 @@ export default async function handler(req, res) {
 
     res.status(200).json({ funcionarios, total });
   } else if (req.method === 'POST') {
-    const existingUser = await db.collection.findOne({ email });
+    const existingUser = await db.collection.findOne({ newFuncionario.email });
       if (existingUser) {
         return res.status(400).json({ success: false, message: 'usuario ja existe' });
       }
