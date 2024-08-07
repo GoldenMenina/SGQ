@@ -140,7 +140,7 @@ const GestaoFuncionarios = () => {
   };
 
   return (
-    <Container width="full" maxW="md">
+    <Box p={8} bg="gray.50" minHeight="100vh">
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={5}>
         <Heading as="h1" size="xl">
           Gestão de Funcionários
@@ -246,7 +246,7 @@ const GestaoFuncionarios = () => {
           </form>
         </ModalContent>
       </Modal>
-    </Container>
+    </Box>
   );
 };
 
