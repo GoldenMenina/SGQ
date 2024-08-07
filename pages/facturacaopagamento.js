@@ -113,9 +113,8 @@ const Facturacao = () => {
 
   const handleDeleteFactura = async (id) => {
     try {
-      const { error } = await supabase.from('facturas').delete().eq('id', id);
-      if (error) throw error;
-
+       await axios.delete(`/api/facturacao/${id}`);
+     
       toast({
         title: 'Factura excluída com sucesso',
         status: 'success',
