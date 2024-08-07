@@ -106,7 +106,8 @@ export default Estatisticas;
 
 
 export async function getServerSideProps() {
-  
+  const client = await clientPromise;
+  const db = client.db('sgq');
   const currentYear = new Date().getFullYear();
   const startOfYear = new Date(currentYear, 0, 1);
   const endOfYear = new Date(currentYear, 11, 31);
@@ -132,13 +133,13 @@ export async function getServerSideProps() {
   });
 
   
-  const invoiceData = await clientPromise.collection('factura').aggregate([
+  const invoiceData = await db.collection('factura').aggregate([
     { $group: { _id: '$status', total: { $sum: '$total' } } }
   ]).toArray();
 
-  const serviceData = await clientPromise.collection('servicos').find().toArray();
+  const serviceData = await db.collection('servicos').find().toArray();
 
-  const productData = await clientPromise.collection('produtos').find().toArray();
+  const productData = await db.collection('produtos').find().toArray();
 
   // You'll need to implement the logic for monthly revenue data
 
