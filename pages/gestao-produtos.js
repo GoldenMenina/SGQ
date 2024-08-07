@@ -186,6 +186,20 @@ const itemsPerPage = 10;
         </Tbody>
       </Table>
 
+      <Box mt={4} display="flex" justifyContent="space-between">
+        <Button
+          onClick={() => setCurrentPage(currentPage - 1)}
+          isDisabled={currentPage === 1}
+        >
+          Anterior
+        </Button>
+        <Button
+          onClick={() => setCurrentPage(currentPage + 1)}
+          isDisabled={currentPage === totalPages}
+        >
+          Próxima
+        </Button>
+      </Box>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
