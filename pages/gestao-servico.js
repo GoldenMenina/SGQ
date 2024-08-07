@@ -24,6 +24,8 @@ import {
   Select,
   useDisclosure,
   IconButton,
+  InputGroup,
+  InputLeftElement,
   useToast,
 } from '@chakra-ui/react';
 import { FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
@@ -36,6 +38,8 @@ const GestaoServicos = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedServico, setSelectedServico] = useState(null);
+  
+  const [searchTerm, setSearchTerm] = useState('');
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
@@ -48,7 +52,7 @@ const GestaoServicos = () => {
 
 const fetchServicos = async () => {
     try {
-      const response = await axios.get(`/api/servicos?page=${currentPage}&limit=${itemsPerPage}`);
+      const response = await axios.get(`/api/servicos?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`);
       setServicos(response.data.servicos);
       setTotalPages(Math.ceil(response.data.total / itemsPerPage));
     } catch (error) {
@@ -61,6 +65,12 @@ const fetchServicos = async () => {
         isClosable: true,
       });
     }
+  };
+
+  
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1); // Reset to first page when searching
   };
 
 
@@ -145,6 +155,15 @@ const fetchServicos = async () => {
         </Button>
       </Box>
 
+<InputGroup mb={5}>
+        <InputLeftElement pointerEvents="none" children={<FiSearch color="gray.300" />} />
+        <Input
+          type="text"
+          placeholder="Buscar por Título, Preço ou Categoria"
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+      </InputGroup>
       <Table variant="simple">
         <Thead>
           <Tr>
