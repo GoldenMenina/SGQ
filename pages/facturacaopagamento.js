@@ -191,8 +191,11 @@ facturaData.total = calculateTotal();
       }
       facturaId = selectedfactura._id;
     } else {
+      
+  const cliente = clientes.find((c) => c._id === facturaData.cliente_id);
       var facturaInfo = facturaData
       facturaInfo.itens = itens
+      facturaInfo.nome = cliente.nome
       await axios.post('/api/facturacao', facturaInfo);
     }
 
@@ -219,6 +222,8 @@ facturaData.total = calculateTotal();
 };
 
   const generatePDF = async (factura) => {
+    
+    console.log(factura.itens)
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
