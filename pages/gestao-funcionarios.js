@@ -140,7 +140,7 @@ const GestaoFuncionarios = () => {
   };
 
   return (
-    <Container maxW="container.xl">
+    <Container width="full" maxW="md">
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={5}>
         <Heading as="h1" size="xl">
           Gestão de Funcionários
@@ -154,7 +154,7 @@ const GestaoFuncionarios = () => {
         <InputLeftElement pointerEvents="none" children={<FiSearch color="gray.300" />} />
         <Input
           type="text"
-          placeholder="Buscar por nome, email ou telefone"
+          placeholder="Buscar por nome, email ou NIF"
           value={searchTerm}
           onChange={handleSearchChange}
         />
