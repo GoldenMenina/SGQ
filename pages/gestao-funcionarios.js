@@ -24,7 +24,7 @@ import {
   InputLeftElement,
   Select,
   useDisclosure,
-  InputLeftElement,
+  InputGroup,
   IconButton,
   useToast,
 } from '@chakra-ui/react';
