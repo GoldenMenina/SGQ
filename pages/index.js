@@ -17,7 +17,7 @@ const Estatisticas = ({
  
   // Configurações dos gráficos
   const graficoStatusFaturas = {
-    labels: invoiceData.map(item => item._id),
+    labels: invoiceData.map(item => item._id === 'paid' ? 'pago':item._id === 'invoice'? 'factura':'proforma' ),
     datasets: [
       {
         data: invoiceData.map(item => item.total),
