@@ -1,44 +1,41 @@
 // pages/login.js
-import { Box, Button, Center, FormControl, FormLabel, Heading, Input, Stack, useToast } from '@chakra-ui/react'
-import supabase from '../lib/supabaseClient'
-import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useState } from 'react';
+import { Box, Button, Center, FormControl, FormLabel, Heading, Input, Stack, useToast } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
+import axios from 'axios';
 
 function LoginPage() {
-  const toast = useToast()
-  const router = useRouter()
-
-  useEffect(() => {
-    // Redirecionar usuários item._id === 'paid' para fora da página de login
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        router.push('/') // Redirecionar para a página inicial ou outra página
-      }
-    }
-
-    checkAuth()
-  }, [router])
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const toast = useToast();
+  const router = useRouter();
 
   const handleLogin = async (e) => {
-    e.preventDefault()
-    const email = e.target.email.value
-    const password = e.target.password.value
-
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-
-    if (error) {
+    e.preventDefault();
+    try {
+      const response = await axios.post('/api/login', { email, password });
+      if (response.data.success) {
+        localStorage.setItem('session', JSON.stringify(response.data.user));
+        router.push('/');
+      } else {
+        toast({
+          title: 'Error',
+          description: response.data.message,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
       toast({
-        title: 'Erro',
-        description: error.message,
+        title: 'Error',
+        description: error.response?.data?.message || 'An error occurred',
         status: 'error',
         duration: 5000,
         isClosable: true,
-      })
-    } else {
-      router.push('/') // Redirecionar para a página inicial ou outra página após login bem-sucedido
+      });
     }
-  }
+  };
 
   return (
     <Center minH="100vh" bg="gray.100">
@@ -48,11 +45,21 @@ function LoginPage() {
           <Stack spacing={4}>
             <FormControl id="email" isRequired>
               <FormLabel>Email</FormLabel>
-              <Input type="email" name="email" placeholder="Digite seu email" />
+              <Input 
+                type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Digite seu email" 
+              />
             </FormControl>
             <FormControl id="password" isRequired>
               <FormLabel>Senha</FormLabel>
-              <Input type="password" name="password" placeholder="Digite sua senha" />
+              <Input 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Digite sua senha" 
+              />
             </FormControl>
             <Button type="submit" colorScheme="teal" size="lg" fontSize="md">
               Entrar
@@ -61,7 +68,7 @@ function LoginPage() {
         </form>
       </Box>
     </Center>
-  )
+  );
 }
 
-export default LoginPage
+export default LoginPage;

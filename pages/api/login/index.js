@@ -5,10 +5,11 @@ import bcrypt from 'bcryptjs';
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
-      const { db } = await connectToDatabase();
+      const client = await clientPromise;
+  const db = client.db('sgq');
       const { email, password } = req.body;
 
-      const user = await db.collection('users').findOne({ email });
+      const user = await db.collection('funcionarios').findOne({ email });
 
       if (user && bcrypt.compareSync(password, user.password)) {
         const { password, ...userWithoutPassword } = user;

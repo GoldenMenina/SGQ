@@ -1,4 +1,5 @@
 import clientPromise from '../../../lib/mongodb';
+import bcrypt from 'bcryptjs';
 
 export default async function handler(req, res) {
   const client = await clientPromise;
@@ -15,7 +16,14 @@ export default async function handler(req, res) {
 
     res.status(200).json({ funcionarios, total });
   } else if (req.method === 'POST') {
-    const newFuncionario = req.body;
+    var newFuncionario = req.body;
+    
+    const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newFuncionario.password, salt);
+newFuncionario.password = hashedPassword
+      
+    
+    
     const result = await collection.insertOne(newFuncionario);
     res.status(201).json();
   } else {
