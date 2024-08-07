@@ -102,7 +102,7 @@ const Facturacao = () => {
 
   const handleEditFactura = async (factura) => {
     setSelectedFactura(factura)
-    const facturaItens = factura.iten
+    const facturaItens = factura.itens
     setItens(facturaItens.map(item => ({
       produto_id: item.produto_id || item.servico_id,
       quantidade: item.quantidade,
