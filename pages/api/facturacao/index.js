@@ -11,9 +11,10 @@ export default async function handler(req, res) {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 const{ search = '' } = req.query;
-const objectId = new ObjectId(search);
+
 let query = {};
     if (search) {
+      const objectId = new ObjectId(search);
       query = {
         $or: [
           { id: { $regex: objectId, $options: 'i' } },
