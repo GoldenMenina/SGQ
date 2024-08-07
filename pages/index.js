@@ -5,50 +5,33 @@ import { Pie, Bar, Line, Doughnut } from 'react-chartjs-2';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, PointElement, LineElement);
 
-const Estatisticas = () => {
+import clientPromise from '../lib/mongodb';
+
+const Estatisticas = ({
+      invoiceData,
+      serviceData,
+      productData,
+      monthlyRevenue
+    }) => {
   // Dados de exemplo (substitua pelos dados reais do seu MongoDB)
-  const dadosFaturas = [
-    { status: 'pago', total: 664664 },
-    { status: 'não pago', total: 500000 },
-    { status: 'atrasado', total: 200000 },
-  ];
-
-  const dadosServicos = [
-    { titulo: 'Contabilidade', preco: 664664 },
-    { titulo: 'Consultoria', preco: 500000 },
-    { titulo: 'Auditoria', preco: 750000 },
-  ];
-
-  const dadosProdutos = [
-    { nome: 'Sopa', quantidade: 20, preco_venda: 20000 },
-    { nome: 'Salada', quantidade: 15, preco_venda: 15000 },
-    { nome: 'Sobremesa', quantidade: 25, preco_venda: 25000 },
-  ];
-
-  const receitaMensal = [
-    { mes: 'Jan', receita: 1000000 },
-    { mes: 'Fev', receita: 1200000 },
-    { mes: 'Mar', receita: 900000 },
-    { mes: 'Abr', receita: 1500000 },
-  ];
-
+  
   // Configurações dos gráficos
   const graficoStatusFaturas = {
-    labels: dadosFaturas.map(item => item.status),
+    labels: invoiceData.map(item => item.status),
     datasets: [
       {
-        data: dadosFaturas.map(item => item.total),
+        data: invoiceData.map(item => item.total),
         backgroundColor: ['#319795', '#4FD1C5', '#81E6D9'],
       },
     ],
   };
 
   const graficoReceitaServicos = {
-    labels: dadosServicos.map(item => item.titulo),
+    labels: serviceData.map(item => item.titulo),
     datasets: [
       {
         label: 'Receita de Serviços',
-        data: dadosServicos.map(item => item.preco),
+        data: serviceData.map(item => item.preco),
         backgroundColor: 'rgba(49, 151, 149, 0.6)',
         borderColor: 'rgba(49, 151, 149, 1)',
         borderWidth: 1,
@@ -57,11 +40,11 @@ const Estatisticas = () => {
   };
 
   const graficoInventarioProdutos = {
-    labels: dadosProdutos.map(item => item.nome),
+    labels: productData.map(item => item.nome),
     datasets: [
       {
         label: 'Quantidade',
-        data: dadosProdutos.map(item => item.quantidade),
+        data: productData.map(item => item.quantidade),
         backgroundColor: 'rgba(49, 151, 149, 0.6)',
         borderColor: 'rgba(49, 151, 149, 1)',
         borderWidth: 1,
@@ -70,11 +53,11 @@ const Estatisticas = () => {
   };
 
   const graficoReceitaNoTempo = {
-    labels: receitaMensal.map(item => item.mes),
+    labels: monthlyRevenue.map(item => item.mes),
     datasets: [
       {
         label: 'Receita Mensal',
-        data: receitaMensal.map(item => item.receita),
+        data: monthlyRevenue.map(item => item.receita),
         fill: false,
         borderColor: 'rgb(49, 151, 149)',
         tension: 0.1,
@@ -120,3 +103,51 @@ const Estatisticas = () => {
 };
 
 export default Estatisticas;
+
+
+export async function getServerSideProps() {
+  
+  const currentYear = new Date().getFullYear();
+  const startOfYear = new Date(currentYear, 0, 1);
+  const endOfYear = new Date(currentYear, 11, 31);
+
+  const invoices = await db.collection('factura').find({
+    data: {
+      $gte: startOfYear,
+      $lte: endOfYear
+    },
+    status: 'paid' // Only consider paid invoices
+  }).toArray();
+
+  // Calculate monthly revenue
+  const monthlyRevenue = Array(12).fill(0).map((_, index) => ({
+    month: new Date(currentYear, index).toLocaleString('default', { month: 'short' }),
+    revenue: 0
+  }));
+  
+  invoices.forEach(invoice => {
+    const invoiceDate = new Date(invoice.data);
+    const monthIndex = invoiceDate.getMonth();
+    monthlyRevenue[monthIndex].revenue += invoice.total;
+  });
+
+  
+  const invoiceData = await clientPromise.collection('factura').aggregate([
+    { $group: { _id: '$status', total: { $sum: '$total' } } }
+  ]).toArray();
+
+  const serviceData = await clientPromise.collection('servicos').find().toArray();
+
+  const productData = await clientPromise.collection('produtos').find().toArray();
+
+  // You'll need to implement the logic for monthly revenue data
+
+  return {
+    props: {
+      invoiceData,
+      serviceData,
+      productData,
+      monthlyRevenue
+    },
+  };
+}
