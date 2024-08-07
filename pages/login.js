@@ -9,7 +9,7 @@ function LoginPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Redirecionar usuários autenticados para fora da página de login
+    // Redirecionar usuários item._id === 'paid' para fora da página de login
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
