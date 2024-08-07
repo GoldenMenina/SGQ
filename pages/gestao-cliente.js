@@ -28,7 +28,7 @@ import {
   IconButton,
   useToast,
 } from '@chakra-ui/react';
-import { FiPlus, FiEdit, FiTrash2,FiSearch } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2, } from 'react-icons/fi';
 import supabase  from '../lib/supabaseClient';
 import axios from 'axios'
 

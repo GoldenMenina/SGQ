@@ -8,12 +8,14 @@ import {
   Thead,
   Tbody,
   Tr,
+  InputGroup,
   Th,
   Td,
   Modal,
   ModalOverlay,
   ModalContent,
   ModalHeader,
+  InputLeftElement,
   ModalFooter,
   ModalBody,
   ModalCloseButton,
@@ -37,14 +39,15 @@ const GestaoFuncionarios = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  const [searchTerm, setSearchTerm] = useState('');
   const itemsPerPage = 10;
   useEffect(() => {
     fetchFuncionarios();
-  }, [currentPage]);
+  }, [currentPage,searchTerm]);
 
   const fetchFuncionarios = async () => {
     try {
-      const response = await axios.get(`/api/funcionarios?page=${currentPage}&limit=${itemsPerPage}`);
+      const response = await axios.get(`/api/funcionarios?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`);
       setFuncionarios(response.data.funcionarios);
       setTotalPages(Math.ceil(response.data.total / itemsPerPage));
     } catch (error) {
@@ -57,6 +60,11 @@ const GestaoFuncionarios = () => {
         isClosable: true,
       });
     }
+  };
+  
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1); // Reset to first page when searching
   };
 
   const handleNovoFuncionario = () => {
@@ -142,6 +150,15 @@ const GestaoFuncionarios = () => {
         </Button>
       </Box>
 
+<InputGroup mb={5}>
+        <InputLeftElement pointerEvents="none" children={<FiSearch color="gray.300" />} />
+        <Input
+          type="text"
+          placeholder="Buscar por nome, email ou telefone"
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+      </InputGroup>
       <Table variant="simple">
         <Thead>
           <Tr>
