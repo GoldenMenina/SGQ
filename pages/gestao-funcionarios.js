@@ -148,6 +148,7 @@ const GestaoFuncionarios = () => {
           Novo Funcionário
         </Button>
       </Box>
+      
 
 <InputGroup mb={5}>
         <InputLeftElement pointerEvents="none" children={<FiSearch color="gray.300" />} />
