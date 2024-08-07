@@ -36,6 +36,7 @@ const GestaoClientes = () => {
   const [loading, setLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedCliente, setSelectedCliente] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
@@ -44,25 +45,28 @@ const GestaoClientes = () => {
 
   useEffect(() => {
     fetchClientes();
-  }, [currentPage]);
+  }, [currentPage,searchTerm]);
 
-  const fetchClientes = async () => {
-    try {
-      const response = await axios.get(`/api/clientes?page=${currentPage}&limit=${itemsPerPage}`);
-      setClientes(response.data.clientes);
-      setTotalPages(Math.ceil(response.data.total / itemsPerPage));
-    } catch (error) {
-      console.error('Erro ao buscar clientes:', error);
-      toast({
-        title: 'Erro ao buscar clientes',
-        description: error.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
+const fetchClientes = async () => {
+  try {
+    const response = await axios.get(`/api/clientes?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`);
+    setClientes(response.data.clientes);
+    setTotalPages(Math.ceil(response.data.total / itemsPerPage));
+  } catch (error) {
+    console.error('Erro ao buscar clientes:', error);
+    toast({
+      title: 'Erro ao buscar clientes',
+      description: error.message,
+      status: 'error',
+      duration: 3000,
+      isClosable: true,
+    });
+  }
+};
+const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1); // Reset to first page when searching
   };
-
   const handleNovoCliente = () => {
     setSelectedCliente(null);
     onOpen();
@@ -144,7 +148,15 @@ const GestaoClientes = () => {
           Novo Cliente
         </Button>
       </Box>
-
+<InputGroup mb={5}>
+        <InputLeftElement pointerEvents="none" children={<FiSearch color="gray.300" />} />
+        <Input
+          type="text"
+          placeholder="Buscar por nome, email ou NIF"
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+      </InputGroup>
       <Table variant="simple">
         <Thead>
           <Tr>
