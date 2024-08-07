@@ -14,10 +14,10 @@ const{ search = '' } = req.query;
 
 let query = {};
     if (search) {
-      const objectId = new ObjectId(search);
+    (search);
       query = {
         $or: [
-          { id: { $regex: objectId, $options: 'i' } },
+          { nome: { $regex: search, $options: 'i' } },
           { data: { $regex: search, $options: 'i' } },
         ],
       };
