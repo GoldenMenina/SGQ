@@ -21,11 +21,14 @@ import {
   FormLabel,
   Input,
   Select,
+  
+  InputGroup,
+  InputLeftElement,
   useDisclosure,
   useToast,
   IconButton
 } from '@chakra-ui/react';
-import { FiPlus, FiEdit, FiTrash2, FiPrinter } from 'react-icons/fi';
+import { FiPlus, FiEdit,FiSearch, FiTrash2, FiPrinter } from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import supabase from '../lib/supabaseClient';
 
@@ -37,6 +40,7 @@ const Facturacao = () => {
   const [produtos, setProdutos] = useState([]);
   const [servicos, setServicos] = useState([]);
   const [empresa, setEmpresa] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedFactura, setSelectedFactura] = useState(null);
   const [itens, setItens] = useState([{ produto_id: '', quantidade: 1, preco: 0 }]);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -53,7 +57,7 @@ const Facturacao = () => {
   
   useEffect(() => {
     fetchFacturas();
-  }, [currentPage]);
+  }, [currentPage,searchTerm]);
   
   const fetchAll = async () => {
     try {
@@ -77,7 +81,7 @@ const Facturacao = () => {
 
   const fetchFacturas = async () => {
     try {
-          const response = await axios.get(`/api/facturacao?page=${currentPage}&limit=${itemsPerPage}`);
+          const response = await axios.get(`/api/facturacao?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`);
       setFacturas(response.data.facturas);
       setTotalPages(Math.ceil(response.data.total / itemsPerPage));
     } catch (error) {
@@ -92,6 +96,11 @@ const Facturacao = () => {
     }
   };
 
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
 
 
   const handleNovoFactura = () => {
@@ -319,7 +328,18 @@ const itemTotal = item.quantidade * parseFloat(item.preco);
       <Button leftIcon={<FiPlus />} colorScheme="teal" onClick={handleNovoFactura}>
         Nova Factura
       </Button>
+      
       <Box mt={4}>
+      
+<InputGroup mb={5}>
+        <InputLeftElement pointerEvents="none" children={<FiSearch color="gray.300" />} />
+        <Input
+          type="text"
+          placeholder="Buscar por nome, SKU"
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+      </InputGroup>
         <Table variant="simple">
           <Thead>
             <Tr>
