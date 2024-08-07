@@ -226,7 +226,7 @@ facturaData.total = calculateTotal();
   const secondaryColor = '#2c3e50';
 
   // Add logo
-  doc.addImage(empresa.foto_url || 'https://picsum.photos/200/100', 'JPEG', 10, 10, 50, 35);
+  doc.addImage(empresa.foto_url || 'https://picsum.photos/200/100', 'JPEG', 10, 10, 50, 50);
 
   // Add title
   doc.setFontSize(24);
