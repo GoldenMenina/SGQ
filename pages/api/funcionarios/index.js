@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     newFuncionario.password = hashedPassword;
 
     const result = await collection.insertOne(newFuncionario);
-    res.status(201).json({ success: true, message: 'usuario criado com sucesso', data: result.ops[0] });
+    res.status(201).json({ success: true, message: 'usuario criado com sucesso'});
   } else {
     res.setHeader('Allow', ['GET', 'POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
