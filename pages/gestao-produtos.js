@@ -24,9 +24,11 @@ import {
   NumberInputField,
   useDisclosure,
   IconButton,
+  InputGroup,
+  InputLeftElement,
   useToast,
 } from '@chakra-ui/react';
-import { FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2, FiSearch} from 'react-icons/fi';
 
 import axios from 'axios'
 
@@ -35,17 +37,19 @@ const GestaoEstoque = () => {
   const [selectedProduto, setSelectedProduto] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
+  
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 const itemsPerPage = 10;
   useEffect(() => {
     fetchProdutos();
-  }, [currentPage]);
+  }, [currentPage,searchTerm]);
 
   const fetchProdutos = async () => {
     try {
-      const response = await axios.get(`/api/produtos?page=${currentPage}&limit=${itemsPerPage}`);
+      const response = await axios.get(`/api/produtos?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`);
       setProdutos(response.data.produtos);
       setTotalPages(Math.ceil(response.data.total / itemsPerPage));
     } catch (error) {
@@ -60,6 +64,11 @@ const itemsPerPage = 10;
     }
   };
   
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
+
   const handleNovoProduto= () => {
     setSelectedProduto(null);
     onOpen();
@@ -149,6 +158,15 @@ const itemsPerPage = 10;
         </Button>
       </Box>
 
+<InputGroup mb={5}>
+        <InputLeftElement pointerEvents="none" children={<FiSearch color="gray.300" />} />
+        <Input
+          type="text"
+          placeholder="Buscar por nome, SKU"
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+      </InputGroup>
       <Table variant="simple">
         <Thead>
           <Tr>

@@ -9,8 +9,18 @@ export default async function handler(req, res) {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-
-    const produtos = await collection.find().skip(skip).limit(limit).toArray();
+const{ search = '' } = req.query;
+let query = {};
+    if (search) {
+      query = {
+        $or: [
+          { nome: { $regex: search, $options: 'i' } },
+          { sku: { $regex: search, $options: 'i' } },
+          { categoria: { $regex: search, $options: 'i' } },
+        ],
+      };
+    }
+    const produtos = await collection.find(query).skip(skip).limit(limit).toArray();
     const total = await collection.countDocuments();
 
     res.status(200).json({ produtos, total });

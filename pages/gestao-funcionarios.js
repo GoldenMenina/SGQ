@@ -8,7 +8,6 @@ import {
   Thead,
   Tbody,
   Tr,
-  InputGroup,
   Th,
   Td,
   Modal,
@@ -21,6 +20,7 @@ import {
   FormControl,
   FormLabel,
   Input,
+  InputGroup,
   InputLeftElement,
   Select,
   useDisclosure,
@@ -152,7 +152,6 @@ const GestaoFuncionarios = () => {
       </Box>
       
       
-
 <InputGroup mb={5}>
         <InputLeftElement pointerEvents="none" children={<FiSearch color="gray.300" />} />
         <Input
