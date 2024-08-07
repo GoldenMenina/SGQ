@@ -8,7 +8,7 @@ import { useEffect } from 'react'
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState('');
+    const [loading, setLoading] = useState(false);
   
   const [session, setSession] = useState(null);
   const toast = useToast();
@@ -16,6 +16,7 @@ function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true)
     try {
       const response = await axios.post('/api/login', { email, password });
       if (response.data.success) {
@@ -30,6 +31,7 @@ function LoginPage() {
           isClosable: true,
         });
       }
+      setLoading(false)
     } catch (error) {
       toast({
         title: 'Error',
@@ -38,6 +40,7 @@ function LoginPage() {
         duration: 5000,
         isClosable: true,
       });
+      setLoading(false)
     }
   };
   
@@ -82,9 +85,11 @@ function LoginPage() {
                 placeholder="Digite sua senha" 
               />
             </FormControl>
-            <Button type="submit" colorScheme="teal" size="lg" fontSize="md">
-              Entrar
-            </Button>
+          {loading?(  <Button colorScheme="teal" size="lg" fontSize="md">
+              aguarde..
+            </Button>):(  <Button type="submit" colorScheme="teal" size="lg" fontSize="md">
+                          Entrar
+                        </Button>)}
           </Stack>
         </form>
       </Box>
