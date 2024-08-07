@@ -144,7 +144,7 @@ return (
           <Flex flex="1" mt="60px">
             <Drawer isOpen={isOpen} onClose={onClose} placement="left">
               <DrawerOverlay zIndex={2000} />
-              <DrawerContent>
+              <DrawerContent zIndex={2000}>
                 <DrawerCloseButton />
                 <DrawerHeader>Menu</DrawerHeader>
                 <DrawerBody>
