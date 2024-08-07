@@ -143,13 +143,15 @@ const Facturacao = () => {
       const selectedProduto = produtos.find(prod => prod._id === value);
       const selectedServico = servicos.find(serv => serv._id === value);
       newItens[index].preco = selectedProduto?.preco_venda || selectedServico?.preco || 0;
+      
+      newItens[index].nome = selectedProduto?.nome || selectedServico?.titulo || '';
     }
 
     setItens(newItens);
   };
 
   const addItem = () => {
-    setItens([...itens, { produto_id: '', quantidade: 1, preco: 0 }]);
+    setItens([...itens, { produto_id: '', quantidade: 1, nome:'',preco: 0 }]);
     
   
   };
@@ -223,7 +225,9 @@ facturaData.total = calculateTotal();
     format: 'a4'
   });
 
-  const itens = factura.itens
+  const itenns = itens
+  const cliente = clientes.find((c) => c._id === factura.cliente_id);
+
   // Set colors
   const primaryColor = '#3498db';
   const secondaryColor = '#2c3e50';
@@ -274,13 +278,10 @@ facturaData.total = calculateTotal();
   // Add invoice items
   yOffset += 15;
   doc.setTextColor(secondaryColor);
-  itens.forEach((item, index) => {
-    const produto = produtos.find((p) => p.id === item.produto_id);
-    const servico = servicos.find((s) => s.id === item.servico_id);
-    const itemName = produto ? produto.nome : servico ? servico.titulo : 'N/A';
-    const itemTotal = item.quantidade * item.preco;
+  itenns.forEach((item, index) => {
 
-    doc.text(itemName, 15, yOffset);
+
+    doc.text(item.nome, 15, yOffset);
     doc.text(item.quantidade.toString(), 105, yOffset);
     doc.text(`${item.preco.toFixed(2)} Kz`, 135, yOffset);
     doc.text(`${itemTotal.toFixed(2)} Kz`, 175, yOffset);
@@ -391,7 +392,7 @@ facturaData.total = calculateTotal();
             <ModalBody>
               <FormControl mb={4}>
                 <FormLabel>Cliente</FormLabel>
-                <Select name="cliente_id" defaultValue={selectedFactura?.cliente_id || ''} required>
+                <Select name="cliente_id" defaultValue={selectedFactura?.cliente_id || ''} required><option value="" disabled>Selecione um cliente</option>
                   {clientes.map(cliente => (
                     <option key={cliente.id} value={cliente.id}>
                       {cliente.nome}
