@@ -36,6 +36,23 @@ function LoginPage() {
       });
     }
   };
+  
+  
+  useEffect(() => {
+    const checkSession = () => {
+      const storedSession = localStorage.getItem('session');
+      if (storedSession) {
+        setSession(JSON.parse(storedSession));
+      }
+      setLoading(false);
+
+      if (!storedSession && router.pathname === '/login') {
+        router.push('/');
+      }
+    };
+
+    checkSession();
+  }, [router]);
 
   return (
     <Center minH="100vh" bg="gray.100">
