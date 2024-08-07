@@ -101,8 +101,7 @@ const Facturacao = () => {
   };
 
   const handleEditFactura = async (factura) => {
-    const facturaItens = await fetchFacturaItens(factura._id);
-    setSelectedFactura(factura);
+    const facturaItens = factura.itens
     setItens(facturaItens.map(item => ({
       produto_id: item.produto_id || item.servico_id,
       quantidade: item.quantidade,
