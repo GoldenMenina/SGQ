@@ -225,7 +225,7 @@ facturaData.total = calculateTotal();
     format: 'a4'
   });
 
-  const itenns = itens
+  const itens = factura.itens
   const cliente = clientes.find((c) => c._id === factura.cliente_id);
 
   // Set colors
@@ -278,7 +278,7 @@ facturaData.total = calculateTotal();
   // Add invoice items
   yOffset += 15;
   doc.setTextColor(secondaryColor);
-  itenns.forEach((item, index) => {
+  itens.forEach((item, index) => {
 
 
     doc.text(item.nome, 15, yOffset);
@@ -341,7 +341,7 @@ facturaData.total = calculateTotal();
             {facturas.map(factura => (
               <Tr key={factura._id}>
                 <Td>{factura._id}</Td>
-                <Td>{clientes.find(cliente => cliente.id === factura.cliente_id)?.nome}</Td>
+                <Td>{factura.cliente_id}</Td>
                 <Td>{new Date(factura.data).toLocaleDateString()}</Td>
                 <Td>{factura.total}</Td>
                 <Td>
@@ -392,9 +392,9 @@ facturaData.total = calculateTotal();
             <ModalBody>
               <FormControl mb={4}>
                 <FormLabel>Cliente</FormLabel>
-                <Select name="cliente_id" defaultValue={selectedFactura?.cliente_id || ''} required><option value="" disabled>Selecione um cliente</option>
+                <Select name="cliente_id" defaultValue={selectedFactura?.cliente_id || ''} required ><option value="" disabled>Selecione um cliente</option>
                   {clientes.map(cliente => (
-                    <option key={cliente.id} value={cliente.id}>
+                    <option onClick={()=>{console.log(cliente)}} key={cliente._id} value={cliente._id}>
                       {cliente.nome}
                     </option>
                   ))}
