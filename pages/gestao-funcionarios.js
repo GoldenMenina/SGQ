@@ -15,13 +15,11 @@ import {
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  InputLeftElement,
   ModalFooter,
   ModalBody,
   ModalCloseButton,
   FormControl,
   FormLabel,
-  VStack,
   Input,
   Select,
   useDisclosure,
@@ -141,9 +139,7 @@ const GestaoFuncionarios = () => {
   };
 
   return (
-    <Box p={8} bg="gray.50" minHeight="100vh">
-    
-      <VStack spacing={8} align="stretch">
+    <Container maxW="container.xl">
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={5}>
         <Heading as="h1" size="xl">
           Gestão de Funcionários
@@ -249,8 +245,7 @@ const GestaoFuncionarios = () => {
           </form>
         </ModalContent>
       </Modal>
-      </VStack>
-    </Box>
+    </Container>
   );
 };
 
