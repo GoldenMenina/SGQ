@@ -21,14 +21,14 @@ import {
   FormLabel,
   Input,
   Select,
-  
+  Stack,
   InputGroup,
   InputLeftElement,
   useDisclosure,
   useToast,
   IconButton
 } from '@chakra-ui/react';
-import { FiPlus, FiEdit,FiSearch, FiTrash2, FiPrinter } from 'react-icons/fi';
+import { FiPlus, FiEdit,FiSearch, FiTrash2, FiPrinter ,FiCalendar} from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import supabase from '../lib/supabaseClient';
 
@@ -55,9 +55,12 @@ const Facturacao = () => {
     fetchAll();
   }, []);
   
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  
   useEffect(() => {
-    fetchFacturas();
-  }, [currentPage,searchTerm]);
+    fetchClientes();
+  }, [currentPage, searchTerm, startDate, endDate]);
   
   const fetchAll = async () => {
     try {
@@ -81,7 +84,7 @@ const Facturacao = () => {
 
   const fetchFacturas = async () => {
     try {
-          const response = await axios.get(`/api/facturacao?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`);
+          const response = await axios.get(`/api/facturacao?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}&startDate=${startDate}&endDate=${endDate}`);
       setFacturas(response.data.facturas);
       setTotalPages(Math.ceil(response.data.total / itemsPerPage));
     } catch (error) {
@@ -101,7 +104,15 @@ const Facturacao = () => {
     setSearchTerm(event.target.value);
     setCurrentPage(1); // Reset to first page when searching
   };
+const handleStartDateChange = (event) => {
+    setStartDate(event.target.value);
+    setCurrentPage(1);
+  };
 
+  const handleEndDateChange = (event) => {
+    setEndDate(event.target.value);
+    setCurrentPage(1);
+  };
 
   const handleNovoFactura = () => {
     setSelectedFactura(null);
@@ -331,15 +342,34 @@ const itemTotal = item.quantidade * parseFloat(item.preco);
       
       <Box mt={4}>
       
-<InputGroup mb={5}>
-        <InputLeftElement pointerEvents="none" children={<FiSearch color="gray.300" />} />
-        <Input
-          type="text"
-          placeholder="Buscar por nome, SKU"
-          value={searchTerm}
-          onChange={handleSearchChange}
-        />
-      </InputGroup>
+<Stack direction={["column", "row"]} spacing={4} mb={5}>
+              <InputGroup>
+                <InputLeftElement pointerEvents="none" children={<FiSearch color="gray.300" />} />
+                <Input
+                  type="text"
+                  placeholder="Buscar por nome"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                />
+              </InputGroup><InputGroup>
+          <InputLeftElement pointerEvents="none" children={<FiCalendar color="gray.300" />} />
+          <Input
+            type="date"
+            placeholder="Data inicial"
+            value={startDate}
+            onChange={handleStartDateChange}
+          />
+        </InputGroup>
+        <InputGroup>
+          <InputLeftElement pointerEvents="none" children={<FiCalendar color="gray.300" />} />
+          <Input
+            type="date"
+            placeholder="Data final"
+            value={endDate}
+            onChange={handleEndDateChange}
+          />
+        </InputGroup>
+        </Stack>
         <Table variant="simple">
           <Thead>
             <Tr>

@@ -10,18 +10,22 @@ export default async function handler(req, res) {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-const{ search = '' } = req.query;
-
+const{ search = '' ,startDate = '', endDate = ''} = req.query;
 let query = {};
-    if (search) {
-    (search);
-      query = {
-        $or: [
-          { nome: { $regex: search, $options: 'i' } },
-          { data: { $regex: search, $options: 'i' } },
-        ],
-      };
-    }
+
+if (search) {
+  query.nome = { $regex: search, $options: 'i' };
+}
+
+if (startDate || endDate) {
+  query.data = {};
+  if (startDate) {
+    query.data.$gte = new Date(startDate);
+  }
+  if (endDate) {
+    query.data.$lte = new Date(endDate);
+  }
+}
     const facturas = await collection.find(query).skip(skip).limit(limit).toArray();
     const total = await collection.countDocuments();
 
