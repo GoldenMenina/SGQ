@@ -50,7 +50,7 @@ function LoginPage() {
       }
       setLoading(false);
 
-      if (!storedSession && router.pathname === '/login') {
+      if (storedSession && router.pathname === '/login') {
         router.push('/');
       }
     };
