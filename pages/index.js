@@ -14,10 +14,10 @@ const Estatisticas = ({
       monthlyRevenue
     }) => {
   // Dados de exemplo (substitua pelos dados reais do seu MongoDB)
-  console.log(invoiceData)
+ 
   // Configurações dos gráficos
   const graficoStatusFaturas = {
-    labels: invoiceData.map(item => item.status),
+    labels: invoiceData.map(item => item._id),
     datasets: [
       {
         data: invoiceData.map(item => item.total),
