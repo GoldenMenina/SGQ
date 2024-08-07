@@ -43,7 +43,7 @@ const navLinks = [
   { label: 'Gestão de Funcionários', href: '/gestao-funcionarios', icon: faUserTie },
   { label: 'Gestão de Produtos', href: '/gestao-produtos', icon: faBoxes },
   { label: 'Faturamento e Pagamentos', href: '/facturacaopagamento', icon: faFileInvoiceDollar },
-  { label: 'Relatórios e Análises', href: '/reports-analytics', icon: faChartBar },
+  { label: 'Gráficos e Análises', href: '/', icon: faChartBar },
   { label: 'Configurações da Empresa', href: '/empresa', icon: faCog },
   
 ]
