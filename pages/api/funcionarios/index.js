@@ -16,20 +16,18 @@ export default async function handler(req, res) {
 
     res.status(200).json({ funcionarios, total });
   } else if (req.method === 'POST') {
-    const existingUser = await db.collection.findOne({ newFuncionario.email });
-      if (existingUser) {
-        return res.status(400).json({ success: false, message: 'usuario ja existe' });
-      }
     var newFuncionario = req.body;
-    
+    const existingUser = await collection.findOne({ email: newFuncionario.email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'usuario ja existe' });
+    }
+
     const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(newFuncionario.password, salt);
-newFuncionario.password = hashedPassword
-      
-    
-    
+    const hashedPassword = await bcrypt.hash(newFuncionario.password, salt);
+    newFuncionario.password = hashedPassword;
+
     const result = await collection.insertOne(newFuncionario);
-    res.status(201).json();
+    res.status(201).json({ success: true, message: 'usuario criado com sucesso', data: result.ops[0] });
   } else {
     res.setHeader('Allow', ['GET', 'POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
