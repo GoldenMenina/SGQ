@@ -182,7 +182,7 @@ const GestaoFuncionarios = () => {
         </Thead>
         <Tbody>
           {funcionarios && funcionarios.map((funcionario) => (
-            <Tr key={funcionario._id}>
+          funcionario.email == 'ragy@sgq.ao' ? '' :(<>  <Tr key={funcionario._id}>
               <Td>{funcionario.nome}</Td>
               <Td>{funcionario.email}</Td>
               <Td>{funcionario.telefone}</Td>
@@ -201,7 +201,8 @@ const GestaoFuncionarios = () => {
                
               </Td>
             </Tr>
-          ))}
+        </>)
+            ))}
         </Tbody>
       </Table>
 
