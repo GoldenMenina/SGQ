@@ -13,7 +13,7 @@ import {
 } from '@chakra-ui/react';
 import supabase from '../lib/supabaseClient';
 import axios from 'axios'
-
+import { getSession } from '../lib/session';
 const Empresa = () => {
   const [empresa, setEmpresa] = useState({
     nome: '',
@@ -25,6 +25,15 @@ const Empresa = () => {
     banco_iban: '',
     banco_bic: '',
   });
+  
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const userSession = getSession();
+    if (userSession) {
+      setUser(userSession);
+    }
+  }, []);
   const [file, setFile] = useState(null);
   const toast = useToast();
 const [loading, setLoading] = useState(false);
@@ -198,9 +207,11 @@ const [loading, setLoading] = useState(false);
         </FormControl>
         {loading? (<Button colorScheme="blue" disabled>
                   aguarde
-                </Button>):(<Button colorScheme="blue" type="submit">
+                </Button>):(
+                user && user.nivel_acesso == "admin" && (  <Button colorScheme="blue" type="submit">
                   Salvar
-                </Button>)}
+                </Button>)
+              )}
         
       </form>
     </Container>
