@@ -193,7 +193,7 @@ const fetchServicos = async () => {
                 <IconButton
                   icon={<FiTrash2 />}
                   aria-label="Excluir"
-                  onClick={() => handleDeleteServico(servico.id)}
+                  onClick={() => handleDeleteServico(servico._id)}
                 />
               </Td>
             </Tr>
@@ -201,20 +201,6 @@ const fetchServicos = async () => {
         </Tbody>
       </Table>
 
-      <Box mt={4} display="flex" justifyContent="space-between">
-        <Button
-          onClick={() => setCurrentPage(currentPage - 1)}
-          isDisabled={currentPage === 1}
-        >
-          Anterior
-        </Button>
-        <Button
-          onClick={() => setCurrentPage(currentPage + 1)}
-          isDisabled={currentPage === totalPages}
-        >
-          Próxima
-        </Button>
-      </Box>
       <Box mt={4} display="flex" justifyContent="space-between">
         <Button
           onClick={() => setCurrentPage(currentPage - 1)}
