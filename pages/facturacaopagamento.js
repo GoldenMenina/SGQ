@@ -55,6 +55,8 @@ const Facturacao = () => {
   }, []);
   
   const [currentPage, setCurrentPage] = useState(1);
+  
+  const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 10;
   const toast = useToast();
@@ -190,6 +192,7 @@ const handleStartDateChange = (event) => {
 
   const handleSubmit = async (event) => {
   event.preventDefault();
+  setLoading(true)
   const formData = new FormData(event.target);
   const facturaData = Object.fromEntries(formData.entries());
 facturaData.total = calculateTotal();
@@ -227,6 +230,7 @@ facturaData.total = calculateTotal();
 
     onClose();
     fetchFacturas();
+    setLoading(false)
   } catch (error) {
     console.error('Error in handleSubmit:', error);
     toast({
@@ -236,6 +240,7 @@ facturaData.total = calculateTotal();
       duration: 3000,
       isClosable: true,
     });
+    setLoading(false)
   }
 };
 
@@ -521,9 +526,11 @@ const itemTotal = item.quantidade * parseFloat(item.preco);
               <Button onClick={onClose} mr={3}>
                 Cancelar
               </Button>
-              <Button colorScheme="teal" type="submit">
+              {loading? ( <Button colorScheme="teal">
+                Aguarde..
+              </Button>):( <Button colorScheme="teal" type="submit">
                 {selectedFactura ? 'Atualizar' : 'Adicionar'}
-              </Button>
+              </Button>)}
             </ModalFooter>
           </form>
         </ModalContent>
