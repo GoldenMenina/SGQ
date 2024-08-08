@@ -31,7 +31,7 @@ import {
 import { FiPlus, FiEdit,FiSearch, FiTrash2, FiPrinter ,FiCalendar} from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import supabase from '../lib/supabaseClient';
-
+import { getSession } from '../lib/session';
 import axios from 'axios'
 
 const Facturacao = () => {
@@ -44,6 +44,15 @@ const Facturacao = () => {
   const [selectedFactura, setSelectedFactura] = useState(null);
   const [itens, setItens] = useState([{ produto_id: '', quantidade: 1, preco: 0 }]);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const userSession = getSession();
+    if (userSession) {
+      setUser(userSession);
+    }
+  }, []);
   
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -388,6 +397,7 @@ const itemTotal = item.quantidade * parseFloat(item.preco);
                 <Td>{new Date(factura.data).toLocaleDateString()}</Td>
                 <Td>{factura.total}</Td>
                 <Td>
+                {user && user.nivel_acesso === 'admin'&&(<>
                   <IconButton
                     icon={<FiEdit />}
                     onClick={() => handleEditFactura(factura)}
@@ -398,7 +408,7 @@ const itemTotal = item.quantidade * parseFloat(item.preco);
                     colorScheme="red"
                     onClick={() => handleDeleteFactura(factura._id)}
                     mr={2}
-                  />
+                  /></>)}
                   <IconButton
                     icon={<FiPrinter />}
                     colorScheme="blue"
