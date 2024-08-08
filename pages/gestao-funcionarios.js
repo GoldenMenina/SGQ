@@ -30,6 +30,7 @@ import {
 } from '@chakra-ui/react';
 import { FiPlus, FiEdit,FiSearch, FiTrash2 } from 'react-icons/fi';
 import axios from 'axios';
+import { getSession } from '../lib/session';
 
 const GestaoFuncionarios = () => {
   const [funcionarios, setFuncionarios] = useState([]);
@@ -40,6 +41,14 @@ const GestaoFuncionarios = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const userSession = getSession();
+    if (userSession) {
+      setUser(userSession);
+    }
+  }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const itemsPerPage = 10;
   useEffect(() => {
@@ -178,8 +187,7 @@ const GestaoFuncionarios = () => {
               <Td>{funcionario.email}</Td>
               <Td>{funcionario.telefone}</Td>
               <Td>{funcionario.nivel_acesso}</Td>
-              <Td>
-                <IconButton
+              <Td>{user&&user.nivel_acesso === 'admin' &&(<> <IconButton
                   icon={<FiEdit />}
                   aria-label="Editar"
                   mr={2}
@@ -189,7 +197,8 @@ const GestaoFuncionarios = () => {
                   icon={<FiTrash2 />}
                   aria-label="Excluir"
                   onClick={() => handleDeleteFuncionario(funcionario._id)}
-                />
+                /></>)}
+               
               </Td>
             </Tr>
           ))}
