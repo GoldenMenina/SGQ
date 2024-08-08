@@ -29,7 +29,7 @@ export default async function handler(req, res) {
         query.data.$lte = endDate;
       }
     }
-
+//++
     console.log('Query:', JSON.stringify(query, null, 2)); // For debugging
 
     const facturas = await collection.find(query).skip(skip).limit(limit).toArray();
