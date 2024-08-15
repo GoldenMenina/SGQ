@@ -235,10 +235,8 @@ const itemsPerPage = 10;
               </FormControl>
               <FormControl mt={4}>
                 <FormLabel>Quantidade</FormLabel>
-                <NumberInput min={0}>
-                  <NumberInputField name="quantidade" defaultValue={selectedProduto?.quantidade} required />
-                </NumberInput>
-                <input defaultValue={selectedProduto?.quantidade} type="text"  />
+               
+                <Input name="sku" defaultValue={selectedProduto?.quantidade} required />
               </FormControl>
               <FormControl mt={4}>
                 <FormLabel>Preço de Custo</FormLabel>
