@@ -238,6 +238,7 @@ const itemsPerPage = 10;
                 <NumberInput min={0}>
                   <NumberInputField name="quantidade" defaultValue={selectedProduto?.quantidade} required />
                 </NumberInput>
+                
               </FormControl>
               <FormControl mt={4}>
                 <FormLabel>Preço de Custo</FormLabel>
