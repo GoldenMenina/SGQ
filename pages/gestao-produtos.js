@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -20,6 +20,7 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Select,
   NumberInput,
   NumberInputField,
   useDisclosure,
@@ -28,9 +29,8 @@ import {
   InputLeftElement,
   useToast,
 } from '@chakra-ui/react';
-import { FiPlus, FiEdit, FiTrash2, FiSearch} from 'react-icons/fi';
-
-import axios from 'axios'
+import { FiPlus, FiEdit, FiTrash2, FiSearch } from 'react-icons/fi';
+import axios from 'axios';
 
 const GestaoEstoque = () => {
   const [produtos, setProdutos] = useState([]);
@@ -42,10 +42,11 @@ const GestaoEstoque = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-const itemsPerPage = 10;
+  const itemsPerPage = 10;
+
   useEffect(() => {
     fetchProdutos();
-  }, [currentPage,searchTerm]);
+  }, [currentPage, searchTerm]);
 
   const fetchProdutos = async () => {
     try {
@@ -66,10 +67,10 @@ const itemsPerPage = 10;
   
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   };
 
-  const handleNovoProduto= () => {
+  const handleNovoProduto = () => {
     setSelectedProduto(null);
     onOpen();
   };
@@ -88,7 +89,7 @@ const itemsPerPage = 10;
     try {
       await axios.delete(`/api/produtos/${id}`);
       toast({
-        title: 'Produtos excluído com sucesso',
+        title: 'Produto excluído com sucesso',
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -111,7 +112,6 @@ const itemsPerPage = 10;
     const formData = new FormData(event.target);
     const produtoData = Object.fromEntries(formData.entries());
   
-  
     try {
       if (selectedProduto) {
         await axios.put(`/api/produtos/${selectedProduto._id}`, produtoData);
@@ -124,7 +124,7 @@ const itemsPerPage = 10;
       } else {
         await axios.post('/api/produtos', produtoData);
         toast({
-          title: 'Produtos adicionado com sucesso',
+          title: 'Produto adicionado com sucesso',
           status: 'success',
           duration: 3000,
           isClosable: true,
@@ -151,27 +151,29 @@ const itemsPerPage = 10;
     <Container maxW="container.xl">
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={5}>
         <Heading as="h1" size="xl">
-          Gestão de Estoque
+          Gestão de Estoque de Produtos de Impressão
         </Heading>
-        <Button leftIcon={<FiPlus />} colorScheme="teal" onClick={handleNovoProduto} >
+        <Button leftIcon={<FiPlus />} colorScheme="teal" onClick={handleNovoProduto}>
           Novo Produto
         </Button>
       </Box>
 
-<InputGroup mb={5}>
+      <InputGroup mb={5}>
         <InputLeftElement pointerEvents="none" children={<FiSearch color="gray.300" />} />
         <Input
           type="text"
-          placeholder="Buscar por nome, SKU"
+          placeholder="Buscar por nome, SKU, tipo de produto"
           value={searchTerm}
           onChange={handleSearchChange}
         />
       </InputGroup>
+
       <Table variant="simple">
         <Thead>
           <Tr>
             <Th>Nome</Th>
             <Th>SKU</Th>
+            <Th>Tipo</Th>
             <Th>Quantidade</Th>
             <Th>Preço de Custo</Th>
             <Th>Preço de Venda</Th>
@@ -183,6 +185,7 @@ const itemsPerPage = 10;
             <Tr key={produto.id}>
               <Td>{produto.nome}</Td>
               <Td>{produto.sku}</Td>
+              <Td>{produto.tipo}</Td>
               <Td>{produto.quantidade}</Td>
               <Td>AOA {produto.preco_custo}</Td>
               <Td>AOA {produto.preco_venda}</Td>
@@ -218,6 +221,7 @@ const itemsPerPage = 10;
           Próxima
         </Button>
       </Box>
+
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
@@ -234,9 +238,31 @@ const itemsPerPage = 10;
                 <Input name="sku" defaultValue={selectedProduto?.sku} required />
               </FormControl>
               <FormControl mt={4}>
+                <FormLabel>Tipo de Produto</FormLabel>
+                <Select name="tipo" defaultValue={selectedProduto?.tipo} required>
+                  <option value="camiseta">Camiseta</option>
+                  <option value="caneca">Caneca</option>
+                  <option value="adesivo">Adesivo</option>
+                  <option value="outro">Outro</option>
+                </Select>
+              </FormControl>
+              <FormControl mt={4}>
                 <FormLabel>Quantidade</FormLabel>
-               
-                <Input name="sku" defaultValue={selectedProduto?.quantidade} required />
+                <NumberInput min={0}>
+                  <NumberInputField name="quantidade" defaultValue={selectedProduto?.quantidade} required />
+                </NumberInput>
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Tamanho (se aplicável)</FormLabel>
+                <Input name="tamanho" defaultValue={selectedProduto?.tamanho} />
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Cor</FormLabel>
+                <Input name="cor" defaultValue={selectedProduto?.cor} />
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Material</FormLabel>
+                <Input name="material" defaultValue={selectedProduto?.material} />
               </FormControl>
               <FormControl mt={4}>
                 <FormLabel>Preço de Custo</FormLabel>
@@ -250,9 +276,17 @@ const itemsPerPage = 10;
                   <NumberInputField name="preco_venda" defaultValue={selectedProduto?.preco_venda} required />
                 </NumberInput>
               </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Fornecedor</FormLabel>
+                <Input name="fornecedor" defaultValue={selectedProduto?.fornecedor} />
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Notas</FormLabel>
+                <Input name="notas" defaultValue={selectedProduto?.notas} />
+              </FormControl>
             </ModalBody>
             <ModalFooter>
-               {loading ? (
+              {loading ? (
                 <Button colorScheme="blue" mr={3} disabled>
                   Aguarde
                 </Button>
