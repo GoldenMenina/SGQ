@@ -38,9 +38,9 @@ export default async function handler(req, res) {
 
     res.status(200).json({ facturas, total });
   } else if (req.method === 'POST') {
-    const newFactura = req.body;
+    var newFactura = req.body;
     const session = client.startSession();
-
+      newFactura.data = new Date(newFactura.data);
     try {
       await session.withTransaction(async () => {
         // Insert the new factura

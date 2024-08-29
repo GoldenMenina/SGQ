@@ -1,4 +1,5 @@
 import clientPromise from '../../../lib/mongodb';
+import moment from 'moment-timezone';
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
@@ -6,29 +7,19 @@ export default async function handler(req, res) {
     const db = client.db('sgq');
     const facturasCollection = db.collection('facturas');
 
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0); // Set to start of day
+    // Define Luanda timezone
+    const luandaTimezone = 'Africa/Luanda';
 
-    const threeDaysFromNow = new Date(currentDate);
-    threeDaysFromNow.setDate(currentDate.getDate() + 3);
+    // Get current date and time in Luanda timezone
+    const currentDate = moment.tz(luandaTimezone).startOf('day').toDate(); // Start of today in Luanda timezone
+    const threeDaysFromNow = moment.tz(luandaTimezone).add(3, 'days').startOf('day').toDate(); // 3 days from now in Luanda timezone
 
     const upcomingPickups = await facturasCollection.aggregate([
       {
-        $addFields: {
-          dateParsed: { $dateFromString: { dateString: "$data" } }
-        }
-      },
-      {
-        $addFields: {
-          currentDate: currentDate,
-          threeDaysFromNow: threeDaysFromNow
-        }
-      },
-      {
         $match: {
-          dateParsed: {
+          date: {
             $gte: currentDate,
-            $lt: threeDaysFromNow
+            $lt: threeDaysFromNow // Up to 3 days from now
           }
         }
       },
@@ -44,6 +35,27 @@ export default async function handler(req, res) {
         $unwind: '$cliente'
       },
       {
+        $addFields: {
+          // Calculate daysUntilPickup
+          daysUntilPickup: {
+            $dateDiff: {
+              startDate: currentDate,
+              endDate: "$date",
+              unit: "day"
+            }
+          }
+        }
+      },
+      {
+        $match: {
+          // Filter to include only documents where daysUntilPickup is within the range [1, 3]
+          daysUntilPickup: {
+            $gte: 1,
+            $lte: 3
+          }
+        }
+      },
+      {
         $project: {
           _id: 1,
           data: 1,
@@ -51,25 +63,15 @@ export default async function handler(req, res) {
           'cliente.nome': 1,
           'cliente.telefone': 1,
           itens: 1,
-          daysUntilPickup: {
-            $dateDiff: {
-              startDate: currentDate,
-              endDate: "$dateParsed",
-              unit: "day"
-            }
-          },
-          dateParsed: 1,        // Include to see parsed date
-          currentDate: 1,       // Include to see current date
-          threeDaysFromNow: 1  // Include to see date range end
+          daysUntilPickup: 1
         }
       },
       {
-        $sort: { daysUntilPickup: 1 }
+        $sort: { daysUntilPickup: 1 } // Sort by daysUntilPickup in ascending order
       }
     ]).toArray();
-
+console.log(upcomingPickups)
     res.status(200).json(upcomingPickups);
-    console.log(upcomingPickups)
   } else {
     res.setHeader('Allow', ['GET']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
