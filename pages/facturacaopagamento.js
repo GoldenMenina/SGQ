@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Button,
@@ -26,15 +26,20 @@ import {
   InputLeftElement,
   useDisclosure,
   useToast,
-  IconButton
+  IconButton,
+  List,
+  ListItem,
 } from '@chakra-ui/react';
-import { FiPlus, FiEdit,FiSearch, FiTrash2, FiPrinter ,FiCalendar} from 'react-icons/fi';
+import { FiPlus, FiEdit, FiSearch, FiTrash2, FiPrinter, FiCalendar } from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import supabase from '../lib/supabaseClient';
 import { getSession } from '../lib/session';
 import axios from 'axios'
 
 const Facturacao = () => {
+  const [searchValue, setSearchValue] = useState('');
+  const [filteredItems, setFilteredItems] = useState([]);
+  const searchRef = useRef(null);
   const [facturas, setFacturas] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [produtos, setProdutos] = useState([]);
@@ -46,6 +51,38 @@ const Facturacao = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   
   const [user, setUser] = useState(null);
+
+  
+  const handleItemChange = (index, field, value, item = null) => {
+    const newItens = [...itens];
+    newItens[index][field] = value;
+
+    if (field === 'produto_id' && item) {
+      newItens[index].preco = item.preco_venda || item.preco || 0;
+      newItens[index].nome = item.nome || item.titulo || '';
+      newItens[index].tipo = item.preco_venda ? 'produto' : 'servico';
+    }
+
+    setItens(newItens);
+    setSearchValue('');
+    setFilteredItems([]);
+  };
+
+  const handleSearchProductChange = (index, value) => {
+    setSearchValue(value);
+    const filtered = [...produtos, ...servicos].filter(item => 
+      item.nome?.toLowerCase().includes(value.toLowerCase()) || 
+      item.titulo?.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredItems(filtered);
+  };
+
+  const handleSearchSelect = (index, item) => {
+    handleItemChange(index, 'produto_id', item._id, item);
+  };
+
+
+
 
   useEffect(() => {
     const userSession = getSession();
@@ -164,21 +201,7 @@ const handleStartDateChange = (event) => {
     }
   };
 
-  const handleItemChange = (index, field, value) => {
-    const newItens = [...itens];
-    newItens[index][field] = value;
 
-    // Update price if product or service is selected
-    if (field === 'produto_id' && value) {
-      const selectedProduto = produtos.find(prod => prod._id === value);
-      const selectedServico = servicos.find(serv => serv._id === value);
-      newItens[index].preco = selectedProduto?.preco_venda || selectedServico?.preco || 0;
-      
-      newItens[index].nome = selectedProduto?.nome || selectedServico?.titulo || '';
-    }
-
-    setItens(newItens);
-  };
 
   const addItem = () => {
     setItens([...itens, { produto_id: '', quantidade: 1, nome:'',preco: 0 }]);
@@ -244,15 +267,14 @@ facturaData.total = calculateTotal();
   }
 };
 
-  const generatePDF = async (factura) => {
-    
+const generatePDF = async (factura) => {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
     format: 'a4'
   });
 
-  const itens = factura.itens
+  const itens = factura.itens;
   const cliente = clientes.find((c) => c._id === factura.cliente_id);
 
   // Set colors
@@ -265,7 +287,7 @@ facturaData.total = calculateTotal();
   // Add title
   doc.setFontSize(24);
   doc.setTextColor(primaryColor);
-  doc.text(`${factura.status == 'proforma' ? 'FACTURA PROFORMA':( factura.status == 'paid'?'FACTURA PAGO':'FACTURA')}`, 200, 20, { align: 'right' });
+  doc.text(`${factura.status == 'proforma' ? 'FACTURA PROFORMA' : (factura.status == 'paid' ? 'FACTURA PAGO' : 'FACTURA')}`, 200, 20, { align: 'right' });
 
   // Add invoice details
   doc.setFontSize(10);
@@ -274,22 +296,22 @@ facturaData.total = calculateTotal();
   doc.text(`Data: ${new Date().toLocaleDateString('pt-PT')}`, 200, 35, { align: 'right' });
   doc.text(`Data de Vencimento: ${new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString('pt-PT')}`, 200, 40, { align: 'right' });
 
-  // Add company info
+  // Add company info with adjusted spacing
   doc.setFontSize(12);
   doc.text(empresa.nome, 10, 50);
   doc.setFontSize(10);
-  doc.text(empresa.endereco, 10, 55);
-  doc.text(empresa.telefone, 10, 60);
-  doc.text(empresa.email, 10, 65);
+  doc.text(empresa.endereco, 10, 56);
+  doc.text(empresa.telefone, 10, 62);
+  doc.text(empresa.email, 10, 68);
 
-  // Add client info
+  // Add client info with adjusted spacing
   if (cliente) {
     doc.setFontSize(12);
     doc.text("Factura para:", 10, 80);
     doc.setFontSize(10);
-    doc.text(cliente.nome, 10, 85);
-    doc.text(cliente.email, 10, 90);
-    doc.text(cliente.telefone, 10, 95);
+    doc.text(cliente.nome, 10, 86);
+    doc.text(cliente.email, 10, 92);
+    doc.text(cliente.telefone, 10, 98);
   }
 
   // Add table header
@@ -297,32 +319,58 @@ facturaData.total = calculateTotal();
   doc.setFillColor(primaryColor);
   doc.rect(10, yOffset, 190, 10, 'F');
   doc.setTextColor(255, 255, 255);
-  doc.text("Item", 15, yOffset + 7);
-  doc.text("Quantidade", 100, yOffset + 7);
-  doc.text("Preço", 130, yOffset + 7);
-  doc.text("Total", 170, yOffset + 7);
+  doc.setFontSize(9);
+  doc.text("Item", 12, yOffset + 7);
+  doc.text("Qtd", 60, yOffset + 7);
+  doc.text("Preço Unit.", 80, yOffset + 7);
+  doc.text("Desconto", 110, yOffset + 7);
+  doc.text("Taxa Imposto", 140, yOffset + 7);
+  doc.text("Total", 175, yOffset + 7);
 
   // Add invoice items
   yOffset += 15;
   doc.setTextColor(secondaryColor);
+  let subtotal = 0;
   itens.forEach((item, index) => {
-const itemTotal = item.quantidade * parseFloat(item.preco);
+    const itemTotal = item.quantidade * parseFloat(item.preco);
+    subtotal += itemTotal;
 
-    doc.text(item.nome, 15, yOffset);
-    doc.text(item.quantidade.toString(), 105, yOffset);
-    doc.text(`${parseFloat(item.preco).toFixed(2)} Kz`, 135, yOffset);
-    doc.text(`${itemTotal.toFixed(2)} Kz`, 175, yOffset);
+    doc.text(item.nome, 12, yOffset, { maxWidth: 45 });
+    doc.text(item.quantidade.toString(), 62, yOffset);
+    doc.text(`${parseFloat(item.preco).toFixed(2)} Kz`, 82, yOffset);
+    doc.text(`0%`, 115, yOffset); // Assuming no discount for now
+    doc.text(`14%`, 150, yOffset);
+    doc.text(`${itemTotal.toFixed(2)} Kz`, 177, yOffset);
 
     yOffset += 10;
   });
+
+  // Calculate tax and total
+  const tax = subtotal * 0.14;
+  const total = subtotal + tax;
+
+  // Add subtotal
+  yOffset += 10;
+  doc.setFillColor(primaryColor);
+  doc.rect(130, yOffset, 70, 10, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.text("Subtotal:", 135, yOffset + 7);
+  doc.text(`${subtotal.toFixed(2)} Kz`, 175, yOffset + 7);
+
+  // Add tax
+  yOffset += 15;
+  doc.setTextColor(secondaryColor);
+  doc.text("Imposto (14%):", 135, yOffset);
+  doc.text(`${tax.toFixed(2)} Kz`, 175, yOffset);
 
   // Add total
   yOffset += 10;
   doc.setFillColor(primaryColor);
   doc.rect(130, yOffset, 70, 10, 'F');
   doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
   doc.text("Total:", 135, yOffset + 7);
-  doc.text(`${factura.total.toFixed(2)} Kz`, 175, yOffset + 7);
+  doc.text(`${total.toFixed(2)} Kz`, 175, yOffset + 7);
 
   // Add payment information
   yOffset += 20;
@@ -333,11 +381,11 @@ const itemTotal = item.quantidade * parseFloat(item.preco);
   yOffset += 7;
   doc.text("Transferência Bancária:", 10, yOffset);
   yOffset += 5;
-  doc.text("Banco "+empresa.banco_nome, 15, yOffset);
+  doc.text("Banco " + empresa.banco_nome, 15, yOffset);
   yOffset += 5;
   doc.text(empresa.banco_iban, 15, yOffset);
   yOffset += 5;
-  doc.text("BIC/SWIFT: "+empresa.banco_bic, 15, yOffset);
+  doc.text("BIC/SWIFT: " + empresa.banco_bic, 15, yOffset);
 
   // Add footer
   doc.setTextColor(secondaryColor);
@@ -345,7 +393,7 @@ const itemTotal = item.quantidade * parseFloat(item.preco);
   doc.text("Obrigado pela sua preferência!", 105, 280, { align: 'center' });
 
   // Save the PDF
-  doc.save(`Factura_Proforma_${factura._id}.pdf`);
+  doc.save(`Factura_${factura.status}_${factura._id}.pdf`);
 };
   return (
     <Container maxW="container.xl" py={4}>
@@ -466,55 +514,73 @@ const itemTotal = item.quantidade * parseFloat(item.preco);
                 </Select>
               </FormControl>
               <FormControl mb={4}>
-                <FormLabel>Data</FormLabel>
+                <FormLabel>Data de entrega</FormLabel>
                 <Input type="date" name="data" defaultValue={selectedFactura?.data.split('T')[0] || ''} required />
               </FormControl>
               <FormControl mb={4}>
                 <FormLabel>Itens</FormLabel>
                 {itens.map((item, index) => (
   <Box key={index} mb={4} borderWidth={1} borderRadius="md" p={4}>
-    {
-    <>
-                    <FormControl mb={2}>
-                      <FormLabel>Produto ou Serviço</FormLabel>
-                      <Select
-                        value={item.produto_id}
-                        onChange={(e) => handleItemChange(index, 'produto_id', e.target.value)}
-                        required
-                      >
-                        <option value="" disabled>Selecione um produto ou serviço</option>
-                        {produtos.map(produto => (
-                          <option key={produto._id} value={produto._id}>
-                            {produto.nome} (Produto)
-                          </option>
-                        ))}
-                        {servicos.map(servico => (
-                          <option key={servico._id} value={servico._id}>
-                            {servico.titulo} (Serviço)
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    <FormControl mb={2}>
-                      <FormLabel>Quantidade</FormLabel>
-                      <Input
-                        type="number"
-                        value={item.quantidade}
-                        onChange={(e) => handleItemChange(index, 'quantidade', parseInt(e.target.value))}
-                        required
-                      />
-                    </FormControl>
-                    <FormControl mb={2}>
-                      <FormLabel>Preço</FormLabel>
-                      <Input
-                        type="number"
-                        value={item.preco}
-                        onChange={(e) => handleItemChange(index, 'preco', parseFloat(e.target.value))}
-                        readOnly
-                      />
-                    </FormControl>
-                    </>
-                  }</Box>
+  <FormControl mb={2}>
+    <FormLabel>Produto ou Serviço</FormLabel>
+    <InputGroup>
+      <Input
+        value={searchValue}
+        onChange={(e) => handleSearchProductChange(index, e.target.value)}
+        placeholder="Buscar produto ou serviço"
+        ref={searchRef}
+      />
+    </InputGroup>
+    {filteredItems.length > 0 && (
+      <List
+        position="absolute"
+        zIndex={1}
+        bg="white"
+        borderWidth={1}
+        borderRadius="md"
+        width="100%"
+        maxHeight="200px"
+        overflowY="auto"
+      >
+        {filteredItems.map((filteredItem) => (
+          <ListItem
+            key={filteredItem._id}
+            p={2}
+            cursor="pointer"
+            _hover={{ bg: "gray.100" }}
+            onClick={() => handleSearchSelect(index, filteredItem)}
+          >
+            {filteredItem.nome || filteredItem.titulo} ({filteredItem.preco_venda ? 'Produto' : 'Serviço'})
+          </ListItem>
+        ))}
+      </List>
+    )}
+  </FormControl>
+  <FormControl mb={2}>
+  <Input
+        value={item.nome}
+        readOnly
+      />
+  </FormControl>
+  <FormControl mb={2}>
+    <FormLabel>Quantidade</FormLabel>
+    <Input
+      type="number"
+      value={item.quantidade}
+      onChange={(e) => handleItemChange(index, 'quantidade', parseInt(e.target.value))}
+      required
+    />
+  </FormControl>
+  <FormControl mb={2}>
+    <FormLabel>Preço</FormLabel>
+    <Input
+      type="number"
+      value={item.preco}
+      onChange={(e) => handleItemChange(index, 'preco', parseFloat(e.target.value))}
+      readOnly
+    />
+  </FormControl>
+</Box>
                 ))}
                 
                 <Button leftIcon={<FiPlus />} onClick={addItem}>
@@ -529,7 +595,7 @@ const itemTotal = item.quantidade * parseFloat(item.preco);
               {loading? ( <Button colorScheme="teal">
                 Aguarde..
               </Button>):( <Button colorScheme="teal" type="submit">
-                {selectedFactura ? 'Atualizar' : 'Adicionar'}
+                {selectedFactura ? 'Atualizar' : 'Efectuar'}
               </Button>)}
             </ModalFooter>
           </form>
